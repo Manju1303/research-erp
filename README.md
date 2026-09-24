@@ -1,186 +1,323 @@
 # Inzovate — Research Publication Management ERP
+### Enterprise-Grade Scholarly Publishing & Research Lifecycle Operating System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-14_App_Router-black?logo=next.js)](https://nextjs.org/)
-[![NestJS](https://img.shields.io/badge/NestJS-10-red?logo=nestjs)](https://nestjs.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-5.19-teal?logo=prisma)](https://www.prisma.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://www.docker.com/)
-
-Enterprise-grade **Research Publication Management ERP** designed for organizations providing end-to-end scholarly manuscript formulation and external journal publication coordination services.
-
----
-
-## 🎯 System Scope & Business Model
-
-Unlike platforms managing a single journal, **Inzovate ERP** centralizes the complete lifecycle assisting researchers, faculty, and academic institutions:
-
-```
-Client Requirement Collection
-         ↓
-Research Topic Allocation
-         ↓
-Research Paper Development (Multi-version drafts)
-         ↓
-Internal Quality Control (Mandatory 10-Point QC Gate)
-         ↓
-Client / Author Approval Workflow
-         ↓
-Journal Intelligence Matching (Scopus, WoS, UGC, etc.)
-         ↓
-Journal Submission Coordination
-         ↓
-Editorial & Peer Review Tracking
-         ↓
-Revision Management (Reviewer remarks & Author responses)
-         ↓
-Official Acceptance Notification
-         ↓
-Publication Release, DOI Issuance & Certification
-         ↓
-Project Closure & Financial Reconciliation
-```
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14_App_Router-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-10.4-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.22-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16_Alpine-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7_Alpine-DC382D?logo=redis&logoColor=white)](https://redis.io/)
+[![Turborepo](https://img.shields.io/badge/Turborepo-Monorepo-EF4444?logo=turborepo&logoColor=white)](https://turbo.build/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
 ---
 
-## 🏗️ Monorepo Architecture
+## 📖 Executive Overview
+
+**Inzovate ERP** is an enterprise-grade, full-lifecycle **Research Publication Management System** built for scholarly service organizations, university research offices, and academic consultancies. 
+
+Unlike traditional journals that manage only their own submissions, Inzovate coordinates the **entire external publication process** for researchers, university faculties, medical institutions, and corporate R&D teams:
+
+```
+Researcher Requirement → Topic Finalization → Manuscript Drafting → 10-Point Internal QC 
+  → Author Sign-off → Journal Intelligence Matching → Portal Submission → Peer Review / Revisions 
+  → Official Acceptance → Publication Release (DOI) → Financial Settlement
+```
+
+Every project transition, manuscript version, reviewer comment, editorial decision, and billing milestone is recorded in an immutable audit trail with role-based access control (RBAC).
+
+---
+
+## 🏛️ System Architecture
+
+The repository is organized as a high-performance **Turborepo monorepo** with strict boundary separation:
 
 ```
 inzovate/
-├── docker-compose.yml              # PostgreSQL 16, Redis 7, pgAdmin 4
-├── turbo.json                      # Turborepo build pipeline
-├── package.json                    # Monorepo root workspace
+├── docker-compose.yml              # Production container stack (PostgreSQL 16, Redis 7, pgAdmin 4)
+├── start-env.ps1                   # Automated zero-friction Windows startup script
+├── turbo.json                      # Turbo caching and task pipeline
+├── package.json                    # Monorepo workspaces definition
 ├── packages/
-│   └── shared/                     # Shared enums, types, DTOs & state machines
+│   └── shared/                     # Canonical domain models, enums & state machine definitions
 │       ├── src/
-│       │   ├── enums/              # 17 ProjectStatus, TaskStatus, SubmissionStatus, etc.
-│       │   ├── state-machines/     # Status transition rules & role authorization configs
-│       │   ├── types/              # Standard ApiResponse & Pagination contracts
-│       │   └── index.ts
-│       ├── tsconfig.json
-│       └── package.json
+│       │   ├── enums/              # 17 ProjectStatus, TaskStatus, ManuscriptStatus, UserRole, etc.
+│       │   ├── state-machines/     # Strict status transition matrices and RBAC transition guards
+│       │   └── types/              # Unified pagination, API responses, and metadata types
+│       └── tsconfig.json
 ├── apps/
-│   ├── backend/                    # NestJS 10 Enterprise Application
+│   ├── backend/                    # Enterprise NestJS 10 REST API
 │   │   ├── prisma/
-│   │   │   ├── schema.prisma       # Relational models with UUIDs, timestamptz & soft deletes
-│   │   │   └── seed.ts             # Idempotent seed for 9 roles, permissions, & Super Admin
+│   │   │   ├── schema.prisma       # 19 Relational models with UUIDs, timestamptz & soft deletes
+│   │   │   └── seed.ts             # Production seeder with 9 roles, real users, journals, and projects
 │   │   ├── src/
-│   │   │   ├── config/             # Environment, JWT, Database & Redis configurations
-│   │   │   ├── database/           # Prisma service & transaction abstractions
-│   │   │   ├── storage/            # Swappable storage provider (Local Disk / AWS S3)
-│   │   │   ├── common/             # RBAC guards, Audit interceptors, Exception filters
+│   │   │   ├── common/             # RBAC guards, Audit interceptor, Transform & Exception filters
+│   │   │   ├── config/             # Type-safe configurations (Postgres, Redis, JWT, CORS)
+│   │   │   ├── database/           # Prisma service & transaction manager
 │   │   │   ├── modules/
-│   │   │   │   ├── auth/           # JWT access & refresh tokens, bcrypt, rate limiting
-│   │   │   │   ├── users/          # User CRUD, role assignments, status toggles
-│   │   │   │   ├── clients/        # Researcher profiles, ORCID IDs, privacy sanitization
-│   │   │   │   ├── projects/       # 17-stage state machine, project code generator
-│   │   │   │   ├── tasks/          # Modular task allocation, completion percentage
-│   │   │   │   ├── manuscripts/    # Non-destructive version tree, QC checklist updates
-│   │   │   │   ├── documents/      # Multi-tier access control (INTERNAL, CLIENT, PUBLIC)
-│   │   │   │   ├── journals/       # Journal Intelligence DB & AI Recommendation matcher
-│   │   │   │   ├── submissions/    # External journal submissions with QC gating
-│   │   │   │   ├── publications/   # DOI registry, citations, and certificate distribution
-│   │   │   │   ├── finance/        # Invoices, milestone disbursements, and payments
-│   │   │   │   ├── communications/ # Multi-channel threaded correspondence
-│   │   │   │   ├── reports/        # Employee workload scorecards & CSV export
-│   │   │   │   ├── audit/          # Immutable system audit trail logs
+│   │   │   │   ├── auth/           # JWT Access/Refresh tokens with bcrypt & DB revocation
+│   │   │   │   ├── users/          # User lifecycle & credential administration
+│   │   │   │   ├── clients/        # Institutional client profiles with ORCID & privacy sanitization
+│   │   │   │   ├── projects/       # 17-stage state machine engine & automated code generation
+│   │   │   │   ├── tasks/          # Kanban tasks with duration tracking & staff assignment
+│   │   │   │   ├── manuscripts/    # Non-destructive version tree & 10-point QC checklist
+│   │   │   │   ├── documents/      # Multi-tier access storage (INTERNAL, CLIENT, PUBLIC)
+│   │   │   │   ├── journals/       # Journal Intelligence DB & auto-matching engine
+│   │   │   │   ├── submissions/    # External journal tracker with QC gating
+│   │   │   │   ├── publications/   # Published paper registry & DOI resolution
+│   │   │   │   ├── finance/        # Invoices, APC disbursements, and payment receipts
+│   │   │   │   ├── communications/ # Threaded client & journal correspondence
+│   │   │   │   ├── reports/        # Employee scorecards & CSV operational reports
+│   │   │   │   ├── audit/          # Cryptographic immutable system audit log
 │   │   │   │   └── dashboard/      # Role-tailored metrics & pipeline analytics
-│   │   │   ├── app.module.ts
-│   │   │   └── main.ts             # Helmet, CORS, Swagger OpenAPI, validation pipes
+│   │   │   └── main.ts             # Application bootstrapper with Helmet, validation pipes & Swagger
 │   │   └── package.json
-│   └── frontend/                   # Next.js 14 App Router with Custom Design System
+│   └── frontend/                   # Next.js 14 App Router UI (Dark-mode Glassmorphic Design)
 │       ├── src/
 │       │   ├── app/
-│       │   │   ├── globals.css     # Ultra-premium dark-mode styling & glassmorphic tokens
-│       │   │   ├── layout.tsx      # Root layout with Sidebar, Navbar, and AuthProvider
-│       │   │   ├── page.tsx        # Executive Dashboard
-│       │   │   ├── projects/       # Project Directory & Workspace Timeline
-│       │   │   ├── manuscripts/    # Manuscript Studio (Live markdown editor & outline)
-│       │   │   ├── qc/             # Quality Control Workbench (10-point checklist)
-│       │   │   ├── journals/       # Journal Intelligence DB & Matching Engine
-│       │   │   ├── submissions/    # External Submission & Peer Review Tracker
-│       │   │   ├── publications/   # Published Papers & DOI Registry
-│       │   │   ├── tasks/          # Kanban Workflow Board (4 status columns)
-│       │   │   ├── clients/        # Institutional Researchers & ORCID Directory
-│       │   │   ├── finance/        # Finance & Billing Management Console
-│       │   │   ├── communications/ # Multi-channel Communication Center
-│       │   │   ├── reports/        # Performance Analytics & CSV Export
-│       │   │   └── audit/          # Cryptographic System Audit Trail Viewer
-│       │   ├── components/         # Navbar, Sidebar, StatCard, StatusBadge, TimelineView
-│       │   └── lib/                # API Client & 9-Role Persona Context
+│       │   │   ├── globals.css     # Bespoke HSL design system with glassmorphism & micro-animations
+│       │   │   ├── layout.tsx      # Persistent responsive shell with Sidebar, Navbar & AuthProvider
+│       │   │   ├── page.tsx        # Executive Dashboard with throughput statistics
+│       │   │   ├── projects/       # Project directory, filter bar & project intake modal
+│       │   │   ├── projects/[id]/  # 17-stage visual lifecycle workspace & history tracker
+│       │   │   ├── manuscripts/[id]# Manuscript Studio with live markdown editor & outline
+│       │   │   ├── qc/             # 10-point QC Workbench with iThenticate verification
+│       │   │   ├── journals/       # Journal Intelligence Database with auto-matching engine
+│       │   │   ├── submissions/    # Submission tracker with revision cycle management
+│       │   │   ├── publications/   # Published Papers Directory with DOI badges
+│       │   │   ├── tasks/          # Interactive Kanban board (TODO, IN_PROGRESS, REVIEW, DONE)
+│       │   │   ├── clients/        # Institutional Researcher Directory with ORCID links
+│       │   │   ├── finance/        # Invoicing, billing analytics & receipt records
+│       │   │   ├── communications/ # Multi-channel communication hub
+│       │   │   ├── reports/        # Employee workload scorecards & CSV exports
+│       │   │   └── audit/          # System audit log viewer with request metadata
+│       │   ├── components/         # Modular UI components (Navbar, Sidebar, Badges, Modals)
+│       │   └── lib/                # Real API Client, Persona Context & Auth State
 │       └── package.json
 ```
 
 ---
 
-## 👥 9 Granular Role-Based Personas (RBAC)
+## 🔄 The 17-Stage Project Lifecycle
 
-The system enforces strict permission boundaries across 9 distinct personas:
+Inzovate models scholarly publication through 17 explicit operational states enforced by a backend state machine:
 
-1. **Super Administrator**: Complete system governance, user provisioning, and role assignment.
-2. **Operations Manager**: Organization-wide project oversight, pipeline throughput, and deadline management.
-3. **Research Manager**: Topic validation, methodology direction, and manuscript allocations.
-4. **Research Staff / Developer**: Manuscript authorship, experimental benchmarking, and assigned task execution.
-5. **Quality Analyst (QC)**: Technical checklist verification, plagiarism screening ($<10\%$), and formatting compliance.
-6. **Publication Executive**: Journal selection, portal submission coordination, and peer-review correspondence.
-7. **Client / Author**: Requirement submission, draft review, manuscript approval, and certificate access. *(Confidential internal staff notes and journal communication are strictly hidden)*.
-8. **Finance / Accounts**: Quotations, invoices, advance payments, APC disbursement, and receipts.
-9. **Executive Management**: Business intelligence, turnaround analytics, and revenue reports.
+| Stage # | Canonical State Key | Stage Name | Description & Action Gate |
+|:---:|:---|:---|:---|
+| **01** | `NEW_REQUIREMENT` | New Requirement | Intake of client scope, domain, target index, and deadline. |
+| **02** | `REQUIREMENT_ANALYSIS` | Requirement Analysis | Feasibility study, literature pre-screening, and resource allocation. |
+| **03** | `TOPIC_FINALIZATION` | Topic Finalization | Novelty verification and formal title formulation. |
+| **04** | `RESEARCH_IN_PROGRESS` | Research in Progress | Experimental benchwork, dataset collation, and mathematical proofs. |
+| **05** | `DRAFTING` | Manuscript Drafting | Initial manuscript drafting across all IMRAD sections. |
+| **06** | `INTERNAL_REVIEW` | Internal QC Review | **Mandatory 10-Point QC Gate** (Plagiarism, citations, formatting). |
+| **07** | `CLIENT_REVIEW` | Client / Author Review | Dispatched to corresponding author for technical review. |
+| **08** | `REVISION` | Author Revision | Incorporating client feedback and refining manuscript versions. |
+| **09** | `FINAL_MANUSCRIPT` | Final Manuscript Approved | Formal author sign-off; manuscript frozen for external submission. |
+| **10** | `JOURNAL_SELECTION` | Journal Selection | Journal Intelligence matching based on scope, APC, and indexing. |
+| **11** | `SUBMISSION_PENDING` | Submission Pending | Cover letter drafting, formatting checks, and file packaging. |
+| **12** | `SUBMITTED` | Submitted to Journal | Uploaded to ScholarOne, Editorial Manager, or publisher portal. |
+| **13** | `UNDER_REVIEW` | Under Peer Review | Tracking editorial status, reviewer assignment, and timelines. |
+| **14** | `REVISION_REQUIRED` | Revision Required | Processing Major/Minor revisions with response-to-reviewers doc. |
+| **15** | `ACCEPTED` | Accepted for Publication | Official editorial acceptance letter received; APC processed. |
+| **16** | `PUBLISHED` | Published with DOI | Final online publication; DOI recorded and certificate issued. |
+| **17** | `COMPLETED` | Project Completed | Project archived, final invoices cleared, and closure confirmed. |
+
+Universal control transitions allow authorized managers to place projects `ON_HOLD` or `CANCELLED` at any non-terminal stage.
+
+---
+
+## 👥 9 Granular Role Personas (RBAC Matrix)
+
+The system features real-time role switching for evaluating all 9 operational perspectives. All accounts are pre-seeded with the universal password: **`Password123!`**:
+
+| Persona | Name | Seed Email | Access Scope & Responsibilities |
+|:---|:---|:---|:---|
+| **Super Admin** | Alex Vance | `admin@inzovate.com` | Full system governance, role permissions, system configuration. |
+| **Operations Manager** | David Mercer | `david.m@inzovate.com` | Organization-wide project throughput, deadlines, and staff allocation. |
+| **Research Manager** | Elena Rostova | `elena.r@inzovate.com` | Topic validation, research methodology, team oversight, status approvals. |
+| **Research Staff** | Dr. Sarah Chen | `sarah.c@inzovate.com` | Manuscript drafting, version creation, benchmark experiments, assigned tasks. |
+| **Quality Analyst (QC)** | Marcus Vance | `marcus.v@inzovate.com` | 10-point QC gate verification, iThenticate checks, similarity scoring. |
+| **Publication Executive** | Priya Sharma | `priya.s@inzovate.com` | Journal identification, submission portals, editorial correspondence. |
+| **Client / Author** | Dr. John Reynolds | `reynolds@stanford.edu` | Scope submission, manuscript approvals, download final papers & certificates. *(Internal staff notes and private journal communications strictly sanitized)*. |
+| **Finance & Accounts** | Sophie Taylor | `sophie.t@inzovate.com` | Invoices, payment receipts, APC disbursements, and financial analytics. |
+| **Executive Management** | Robert Stirling | `robert.s@inzovate.com` | Business intelligence, employee scorecards, and revenue reporting. |
 
 ---
 
 ## 🛡️ Mandatory 10-Point Internal QC Gate
 
-Before any manuscript is dispatched to external journal editors, it must pass the 10-point inspection in the QC console:
+To guarantee publication success in Q1/Q2 high-impact journals, Inzovate enforces a strict **10-Point Technical Verification Gate**. External submission is blocked by backend middleware until all 10 criteria pass:
 
-| # | Inspection Item | Verification Criteria |
-|---|---|---|
-| 1 | **Title & Subtitle** | Concise, scientifically accurate, avoid over-generalization. |
-| 2 | **Abstract & Keywords** | Word count $\le 250$ words, canonical indexing keywords included. |
-| 3 | **Research Problem & Gap** | Problem statement explicitly defined with identified literature gap. |
-| 4 | **Methodology & Rigor** | Mathematical models, algorithmic formulations, reproducible steps. |
-| 5 | **Experimental Datasets** | Data provenance, benchmark cohorts, statistical validation. |
-| 6 | **Citations & References** | $\ge 80\%$ peer-reviewed citations with active DOIs. |
-| 7 | **Journal Layout Guidelines**| Columns, margins, table formatting, figure resolution (300+ DPI). |
-| 8 | **Plagiarism Screening** | iThenticate / Turnitin similarity verified $< 10\%$ overall ($< 1\%$ per single source). |
-| 9 | **Author Declarations** | Conflict of interest, data availability, ethical clearances. |
-| 10 | **Author & ORCID Creds** | Institutional email verification and active ORCID identifiers. |
+```
+[✓] 1. Title & Scope Alignment      -> Concise, scientifically accurate, avoiding broad claims
+[✓] 2. Abstract & Keywords           -> Word count <= 250 words; MeSH/IEEE canonical indexing
+[✓] 3. Research Problem & Gap        -> Identified literature gap explicitly framed
+[✓] 4. Methodology & Rigor           -> Equations, algorithms, and experimental steps reproducible
+[✓] 5. Experimental Datasets         -> Data provenance, benchmarks (e.g. ClinVar, ImageNet) verified
+[✓] 6. Citation & DOI Integrity      -> >= 80% peer-reviewed citations with resolvable DOIs
+[✓] 7. Journal Formatting Match      -> Exact margins, columns, reference styles (Nature, IEEE, etc.)
+[✓] 8. Plagiarism Similarity Check   -> Verified < 10% overall similarity (< 1% per single source)
+[✓] 9. Author Declarations           -> Conflicts of interest, funding disclosures, IRB approvals
+[✓] 10. Institutional & ORCID Creds  -> Verified institutional email and authenticated ORCID iDs
+```
 
 ---
 
-## 🚀 Quickstart & Deployment
+## 🗄️ Relational Data Model (19 Prisma Entities)
 
-### Prerequisites
-- Node.js $\ge 20$
-- Docker & Docker Desktop
+```mermaid
+erDiagram
+    User ||--o{ RefreshToken : has
+    User ||--o{ AuditLog : records
+    User ||--o{ Notification : receives
+    User ||--o| Client : profiles
+    Role ||--o{ User : classifies
+    Role ||--o{ RolePermission : defines
+    Permission ||--o{ RolePermission : assigns
 
-### 1. Launch Database & Cache
+    Client ||--o{ Project : owns
+    User ||--o{ Project : manages
+    Project ||--o{ ProjectStatusHistory : logs
+    Project ||--o{ ProjectStaff : assigns
+    Project ||--o{ Task : contains
+    Project ||--o| Manuscript : develops
+    Manuscript ||--o{ ManuscriptVersion : versions
+    ManuscriptVersion ||--o{ Document : stores
+    ManuscriptVersion ||--o{ ClientApproval : approves
+
+    Journal ||--o{ Submission : receives
+    Project ||--o{ Submission : submits
+    Submission ||--o{ Revision : tracks
+    Submission ||--o| Publication : produces
+
+    Project ||--o{ Invoice : bills
+    Client ||--o{ Invoice : receives
+    Invoice ||--o{ Payment : clears
+    Project ||--o{ Communication : logs
+```
+
+---
+
+## 🚀 Quickstart & Setup Guide
+
+### System Requirements
+- **Node.js**: $\ge 20.0.0$
+- **npm**: $\ge 10.0.0$
+- **Docker & Docker Desktop** (Windows / macOS / Linux)
+
+### Option A: Automated One-Click Launch (Windows PowerShell)
+The repository includes an automated orchestration script that checks Docker, spins up containers, runs database migrations, seeds real records, and launches both frontend and backend:
+
+```powershell
+.\start-env.ps1
+```
+
+---
+
+### Option B: Step-by-Step Manual Setup
+
+#### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/Manju1303/research-erp.git
+cd inzovate
+npm install
+```
+
+#### 2. Start PostgreSQL & Redis Containers
 ```bash
 docker compose up -d
 ```
-*Starts PostgreSQL 16 on port `5432`, Redis 7 on port `6379`, and pgAdmin 4 on port `5050`.*
+*Verifies PostgreSQL running on port `5432`, Redis on `6379`, and pgAdmin on `5050`.*
 
-### 2. Backend Setup
+#### 3. Configure Environment Variables
+Copy the example environments:
 ```bash
-cd apps/backend
-cp .env.example .env
-npm install
-npm run db:migrate
-npm run db:seed
+cp apps/backend/.env.example apps/backend/.env
+cp apps/frontend/.env.example apps/frontend/.env.local
+```
+
+#### 4. Run Prisma Migrations & Seed Real Data
+```bash
+# Generate the Prisma Client
+npx prisma generate --schema=apps/backend/prisma/schema.prisma
+
+# Push schema migrations to PostgreSQL
+npx prisma migrate dev --name init --schema=apps/backend/prisma/schema.prisma
+
+# Populate 9 real roles, verified journals, projects, QC checklists & invoices
+npm run db:seed --prefix apps/backend
+```
+
+#### 5. Launch Full Stack
+```bash
 npm run dev
 ```
-*Backend runs on `http://localhost:4000/api/v1` with Swagger docs at `http://localhost:4000/api/docs`.*
 
-### 3. Frontend Setup
+The system will start with:
+- **Frontend App**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:4000/api/v1](http://localhost:4000/api/v1)
+- **Interactive Swagger Docs**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
+- **pgAdmin Database Console**: [http://localhost:5050](http://localhost:5050) *(User: `admin@inzovate.local`, Pass: `pgadmin_dev_pass`)*
+
+---
+
+## 📡 REST API Reference
+
+The backend provides complete OpenAPI / Swagger documentation at `/api/docs`. Key endpoints include:
+
+| Module | Method | Endpoint | Description | Guard / RBAC |
+|:---|:---:|:---|:---|:---|
+| **Auth** | `POST` | `/api/v1/auth/login` | Authenticate with email/password; returns JWT pair | Public |
+| **Auth** | `POST` | `/api/v1/auth/refresh` | Refresh access token using active refresh token | Public |
+| **Auth** | `GET` | `/api/v1/auth/me` | Fetch authenticated user profile & permissions | JWT Bearer |
+| **Projects** | `GET` | `/api/v1/projects` | List projects with filtering, pagination & search | `projects:read` |
+| **Projects** | `POST` | `/api/v1/projects` | Create new research project with unique code | `projects:create` |
+| **Projects** | `PATCH`| `/api/v1/projects/:id/status` | Execute state machine lifecycle transition | `projects:transition_status` |
+| **Manuscripts**| `POST`| `/api/v1/manuscripts/:id/versions` | Create non-destructive manuscript revision | `manuscripts:create` |
+| **QC Gate** | `PATCH`| `/api/v1/manuscripts/versions/:id/qc`| Update 10-point verification checklist items | `manuscripts:qc_update` |
+| **Journals** | `GET` | `/api/v1/journals` | Search journal intelligence database | Public / Auth |
+| **Journals** | `POST`| `/api/v1/journals/match` | Match paper against journals by scope & APC | Auth |
+| **Submissions**| `POST`| `/api/v1/submissions` | Register portal submission with QC gate check | `manuscripts:read` |
+| **Tasks** | `GET` | `/api/v1/tasks` | Get project tasks formatted for Kanban view | `tasks:read` |
+| **Tasks** | `PATCH`| `/api/v1/tasks/:id/status` | Update task status & completion percentage | `tasks:update` |
+| **Finance** | `GET` | `/api/v1/finance/invoices` | List invoices with payment reconciliation | `finance:read` |
+| **Audit** | `GET` | `/api/v1/audit-logs` | Immutable audit trail for compliance verification | `audit_logs:read` |
+
+---
+
+## 🔒 Security & Data Governance
+
+1. **Authentication & Token Storage**:
+   - Access tokens signed with HMAC-SHA256 (`900s` TTL).
+   - Refresh tokens hashed with `bcrypt` (12 rounds) and stored in the database for instant session revocation on logout.
+2. **Strict Client Data Sanitization**:
+   - Internal staff discussions, quality analyst remarks, and vendor notes are stripped via DTO serialization filters before serving client accounts.
+3. **Automated Audit Interceptor**:
+   - Every mutating HTTP request (`POST`, `PUT`, `PATCH`, `DELETE`) is captured asynchronously by `AuditInterceptor`, recording user identity, role, IP address, user agent, action target, and duration.
+4. **Input Sanitization & Validation**:
+   - Global NestJS `ValidationPipe` with `whitelist: true` and `forbidNonWhitelisted: true` preventing parameter injection attacks.
+
+---
+
+## 🧪 Build & Quality Verification
+
+To run static type checks and builds across all packages:
+
 ```bash
-cd apps/frontend
-npm install
-npm run dev
+# Verify shared contracts
+npx tsc -p packages/shared/tsconfig.json --noEmit
+
+# Verify backend NestJS compilation
+npx tsc -p apps/backend/tsconfig.json --noEmit
+npm run build --prefix apps/backend
+
+# Verify frontend Next.js 14 production build (15 static/dynamic routes)
+npm run build --prefix apps/frontend
 ```
-*Frontend runs on `http://localhost:3000`. Use the sidebar persona switcher to evaluate all 9 roles.*
 
 ---
 
 ## 📄 License
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**.
+Distributed by **Inzovate Technologies**.
