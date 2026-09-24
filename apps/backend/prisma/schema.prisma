@@ -1,0 +1,608 @@
+// ============================================================
+// Inzovate — Research Publication Management ERP
+// Prisma Schema  |  Phase 1 Data Model
+// ============================================================
+// Conventions:
+//   - All PKs are UUIDs (uuid())
+//   - All timestamps use @db.Timestamptz
+//   - Soft deletes via `deletedAt` (null = active)
+//   - Status fields store canonical string keys from shared enums
+//   - Never store role/permission logic in application code alone —
+//     always resolve via roles ↔ permissions join
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// AUTH & RBAC
+// ─────────────────────────────────────────────
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique               // e.g. "super_admin"
+  displayName String                         // e.g. "Super Administrator"
+  description String?
+  isSystem    Boolean  @default(false)       // system roles cannot be deleted
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  rolePermissions RolePermission[]
+  users           User[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique               // e.g. "projects:create"
+  resource    String                         // e.g. "projects"
+  action      String                         // e.g. "create"
+  scope       String?                        // e.g. "own" (null = all)
+  description String?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  grantedAt    DateTime @default(now()) @db.Timestamptz
+  grantedBy    String?
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique              // bcrypt hash of the raw token
+  expiresAt DateTime @db.Timestamptz
+  revokedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  ipAddress String?
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  phone         String?
+  avatarUrl     String?
+  orcidId       String?                       // ORCID iD (Phase 2 integration)
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  lastLoginAt   DateTime? @db.Timestamptz
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+  deletedAt     DateTime? @db.Timestamptz     // soft delete
+
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  // Relations
+  clientProfile     Client?
+  assignedTasks     Task[]             @relation("TaskAssignee")
+  createdTasks      Task[]             @relation("TaskCreator")
+  managedProjects   Project[]          @relation("ProjectManager")
+  createdProjects   Project[]          @relation("ProjectCreator")
+  uploadedDocuments Document[]
+  manuscriptVersions ManuscriptVersion[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+  refreshTokens     RefreshToken[]
+  projectStatusHistories ProjectStatusHistory[]
+  clientApprovals   ClientApproval[]
+  communications    Communication[]
+
+  @@index([email])
+  @@index([roleId])
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────
+// CLIENTS
+// ─────────────────────────────────────────────
+
+model Client {
+  id             String    @id @default(uuid())
+  userId         String    @unique              // One-to-one with User
+  organization   String?
+  designation    String?
+  fieldOfStudy   String?
+  orcidId        String?
+  address        String?
+  country        String?
+  timezone       String?
+  notes          String?   @db.Text             // Internal notes (never exposed to client)
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+  deletedAt      DateTime? @db.Timestamptz
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects       Project[]
+  invoices       Invoice[]
+  payments       Payment[]
+  communications Communication[]
+
+  @@map("clients")
+}
+
+// ─────────────────────────────────────────────
+// PROJECTS
+// ─────────────────────────────────────────────
+
+model Project {
+  id              String    @id @default(uuid())
+  projectCode     String    @unique              // e.g. "INZ-2024-001"
+  title           String
+  description     String?   @db.Text
+  domain          String?                        // e.g. "Medical Sciences"
+  keywords        String[]  @default([])
+  priority        String    @default("NORMAL")   // LOW | NORMAL | HIGH | URGENT
+  status          String    @default("NEW_REQUIREMENT")
+  deadline        DateTime? @db.Timestamptz
+  targetJournalType String?                      // Scopus/WoS/etc.
+  budget          Decimal?  @db.Decimal(12, 2)
+  currency        String    @default("USD")
+  internalNotes   String?   @db.Text             // Staff-only; never exposed to client
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+  deletedAt       DateTime? @db.Timestamptz
+
+  clientId   String
+  managerId  String?                             // Research Manager
+  creatorId  String
+
+  client      Client    @relation(fields: [clientId], references: [id])
+  manager     User?     @relation("ProjectManager", fields: [managerId], references: [id])
+  creator     User      @relation("ProjectCreator", fields: [creatorId], references: [id])
+
+  // Relations
+  statusHistory     ProjectStatusHistory[]
+  tasks             Task[]
+  manuscripts       Manuscript[]
+  documents         Document[]
+  assignedStaff     ProjectStaff[]
+  submissions       Submission[]
+  publications      Publication[]
+  clientApprovals   ClientApproval[]
+  communications    Communication[]
+  invoices          Invoice[]
+  payments          Payment[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([projectCode])
+  @@map("projects")
+}
+
+model ProjectStatusHistory {
+  id         String   @id @default(uuid())
+  projectId  String
+  fromStatus String?
+  toStatus   String
+  note       String?  @db.Text
+  changedBy  String
+  changedAt  DateTime @default(now()) @db.Timestamptz
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [changedBy], references: [id])
+
+  @@index([projectId])
+  @@map("project_status_history")
+}
+
+model ProjectStaff {
+  projectId   String
+  userId      String
+  role        String                            // e.g. "research_staff", "quality_analyst"
+  assignedAt  DateTime @default(now()) @db.Timestamptz
+  assignedBy  String?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+  @@map("project_staff")
+}
+
+// ─────────────────────────────────────────────
+// TASKS
+// ─────────────────────────────────────────────
+
+model Task {
+  id               String    @id @default(uuid())
+  projectId        String
+  title            String
+  description      String?   @db.Text
+  status           String    @default("TODO")
+  priority         String    @default("NORMAL")
+  completionPct    Int       @default(0)         // 0–100
+  dueDate          DateTime? @db.Timestamptz
+  completedAt      DateTime? @db.Timestamptz
+  estimatedHours   Decimal?  @db.Decimal(6, 2)
+  actualHours      Decimal?  @db.Decimal(6, 2)
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+  deletedAt        DateTime? @db.Timestamptz
+
+  assigneeId String?
+  creatorId  String
+
+  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee User?   @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  creator  User    @relation("TaskCreator", fields: [creatorId], references: [id])
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([status])
+  @@map("tasks")
+}
+
+// ─────────────────────────────────────────────
+// MANUSCRIPTS & VERSIONING
+// ─────────────────────────────────────────────
+
+model Manuscript {
+  id          String    @id @default(uuid())
+  projectId   String    @unique               // One manuscript per project (with versions)
+  title       String
+  abstract    String?   @db.Text
+  keywords    String[]  @default([])
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  project  Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions ManuscriptVersion[]
+
+  @@map("manuscripts")
+}
+
+model ManuscriptVersion {
+  id            String    @id @default(uuid())
+  manuscriptId  String
+  versionNumber Int                             // Auto-incremented per manuscript
+  title         String
+  abstract      String?   @db.Text
+  content       String?   @db.Text             // Rich text / markdown body
+  wordCount     Int?
+  status        String    @default("DRAFT")
+  changeNotes   String?   @db.Text            // What changed in this version
+  qcChecklist   Json?                          // Checklist items + completion state
+  qcNotes       String?   @db.Text
+  isLatest      Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+
+  authorId      String
+
+  manuscript Manuscript @relation(fields: [manuscriptId], references: [id], onDelete: Cascade)
+  author     User       @relation(fields: [authorId], references: [id])
+  documents  Document[] @relation("VersionDocuments")
+  submissions Submission[]
+  clientApprovals ClientApproval[]
+
+  @@unique([manuscriptId, versionNumber])
+  @@index([manuscriptId])
+  @@index([status])
+  @@map("manuscript_versions")
+}
+
+// ─────────────────────────────────────────────
+// DOCUMENTS (File Storage)
+// ─────────────────────────────────────────────
+
+model Document {
+  id           String    @id @default(uuid())
+  filename     String                          // Original filename
+  storagePath  String                          // Relative path in storage backend
+  mimeType     String
+  sizeBytes    BigInt
+  category     String                          // e.g. "MANUSCRIPT", "QC_REPORT", "REQUIREMENT"
+  accessLevel  String    @default("INTERNAL")  // INTERNAL | CLIENT | PUBLIC
+  description  String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+  deletedAt    DateTime? @db.Timestamptz
+
+  uploadedById String
+  projectId    String?
+  manuscriptVersionId String?
+
+  uploadedBy       User               @relation(fields: [uploadedById], references: [id])
+  project          Project?           @relation(fields: [projectId], references: [id])
+  manuscriptVersion ManuscriptVersion? @relation("VersionDocuments", fields: [manuscriptVersionId], references: [id])
+
+  @@index([projectId])
+  @@index([uploadedById])
+  @@map("documents")
+}
+
+// ─────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String                            // e.g. "PROJECT_STATUS_CHANGED"
+  title     String
+  body      String    @db.Text
+  metadata  Json?                             // Extra context (projectId, etc.)
+  isRead    Boolean   @default(false)
+  readAt    DateTime? @db.Timestamptz
+  createdAt DateTime  @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOGS (Immutable)
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?                         // null if system action
+  userEmail   String?                         // denormalized for historical accuracy
+  userRole    String?                         // denormalized
+  action      String                          // e.g. "project.status_changed"
+  entity      String                          // e.g. "Project"
+  entityId    String?
+  beforeValue Json?
+  afterValue  Json?
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────────
+// JOURNALS (Intelligence Database)
+// ─────────────────────────────────────────────
+
+model Journal {
+  id                      String    @id @default(uuid())
+  name                    String
+  publisher               String
+  issn                    String?
+  eissn                   String?
+  website                 String?
+  subjectArea             String
+  country                 String?
+  frequency               String?
+  apc                     Decimal?  @db.Decimal(10, 2)
+  reviewDurationDays      Int?
+  publicationDurationDays Int?
+  indexing                String[]  @default([])
+  formattingReqs          String?   @db.Text
+  wordLimit               Int?
+  referenceStyle          String?
+  contactEmail            String?
+  isVerified              Boolean   @default(true)
+  createdAt               DateTime  @default(now()) @db.Timestamptz
+  updatedAt               DateTime  @updatedAt @db.Timestamptz
+
+  submissions             Submission[]
+
+  @@index([name])
+  @@index([subjectArea])
+  @@map("journals")
+}
+
+// ─────────────────────────────────────────────
+// SUBMISSIONS
+// ─────────────────────────────────────────────
+
+model Submission {
+  id                    String    @id @default(uuid())
+  projectId             String
+  journalId             String
+  manuscriptVersionId   String?
+  status                String    @default("NOT_SUBMITTED")
+  submissionDate        DateTime? @db.Timestamptz
+  submissionMethod      String?
+  submissionAccount     String?
+  submissionRefId       String?
+  editorialContact      String?
+  expectedResponseDate  DateTime? @db.Timestamptz
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+
+  project               Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  journal               Journal            @relation(fields: [journalId], references: [id])
+  manuscriptVersion     ManuscriptVersion? @relation(fields: [manuscriptVersionId], references: [id])
+  revisions             Revision[]
+  publication           Publication?
+
+  @@index([projectId])
+  @@index([journalId])
+  @@index([status])
+  @@map("submissions")
+}
+
+// ─────────────────────────────────────────────
+// REVISIONS
+// ─────────────────────────────────────────────
+
+model Revision {
+  id                          String    @id @default(uuid())
+  submissionId                String
+  cycleNumber                 Int       @default(1)
+  reviewerComments            String?   @db.Text
+  editorComments              String?   @db.Text
+  assignedStaffId             String?
+  authorResponse              String?   @db.Text
+  revisedManuscriptVersionId  String?
+  responseDocUrl              String?
+  deadline                    DateTime? @db.Timestamptz
+  submittedAt                 DateTime? @db.Timestamptz
+  status                      String    @default("PENDING")
+  createdAt                   DateTime  @default(now()) @db.Timestamptz
+  updatedAt                   DateTime  @updatedAt @db.Timestamptz
+
+  submission                  Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("revisions")
+}
+
+// ─────────────────────────────────────────────
+// PUBLICATIONS
+// ─────────────────────────────────────────────
+
+model Publication {
+  id              String    @id @default(uuid())
+  submissionId    String    @unique
+  projectId       String
+  title           String
+  doi             String?   @unique
+  articleUrl      String?
+  volume          String?
+  issue           String?
+  pageNumbers     String?
+  publicationDate DateTime? @db.Timestamptz
+  finalPdfUrl     String?
+  certificateUrl  String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  project         Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([doi])
+  @@map("publications")
+}
+
+// ─────────────────────────────────────────────
+// CLIENT APPROVAL WORKFLOW
+// ─────────────────────────────────────────────
+
+model ClientApproval {
+  id                  String    @id @default(uuid())
+  projectId           String
+  manuscriptVersionId String
+  userId              String
+  status              String    @default("APPROVED")
+  comments            String?   @db.Text
+  approvedAt          DateTime  @default(now()) @db.Timestamptz
+
+  project             Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  manuscriptVersion   ManuscriptVersion @relation(fields: [manuscriptVersionId], references: [id], onDelete: Cascade)
+  user                User              @relation(fields: [userId], references: [id])
+
+  @@index([projectId])
+  @@index([manuscriptVersionId])
+  @@map("client_approvals")
+}
+
+// ─────────────────────────────────────────────
+// COMMUNICATIONS MANAGEMENT
+// ─────────────────────────────────────────────
+
+model Communication {
+  id          String   @id @default(uuid())
+  type        String
+  projectId   String?
+  clientId    String?
+  userId      String?
+  subject     String?
+  body        String   @db.Text
+  attachments String[] @default([])
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([clientId])
+  @@index([type])
+  @@map("communications")
+}
+
+// ─────────────────────────────────────────────
+// FINANCE, INVOICES & BILLING
+// ─────────────────────────────────────────────
+
+model Invoice {
+  id            String    @id @default(uuid())
+  invoiceNumber String    @unique
+  projectId     String
+  clientId      String
+  amount        Decimal   @db.Decimal(12, 2)
+  currency      String    @default("USD")
+  status        String    @default("PENDING")
+  dueDate       DateTime? @db.Timestamptz
+  issuedAt      DateTime  @default(now()) @db.Timestamptz
+  paidAt        DateTime? @db.Timestamptz
+  items         Json?
+  notes         String?   @db.Text
+
+  project       Project   @relation(fields: [projectId], references: [id])
+  client        Client    @relation(fields: [clientId], references: [id])
+  payments      Payment[]
+
+  @@index([projectId])
+  @@index([clientId])
+  @@index([invoiceNumber])
+  @@map("invoices")
+}
+
+model Payment {
+  id             String    @id @default(uuid())
+  receiptNumber  String    @unique
+  invoiceId      String?
+  projectId      String
+  clientId       String
+  amount         Decimal   @db.Decimal(12, 2)
+  currency       String    @default("USD")
+  paymentType    String
+  status         String    @default("PAID")
+  paymentMethod  String?
+  transactionRef String?
+  paidAt         DateTime  @default(now()) @db.Timestamptz
+
+  project        Project   @relation(fields: [projectId], references: [id])
+  client         Client    @relation(fields: [clientId], references: [id])
+  invoice        Invoice?  @relation(fields: [invoiceId], references: [id])
+
+  @@index([projectId])
+  @@index([clientId])
+  @@index([receiptNumber])
+  @@map("payments")
+}

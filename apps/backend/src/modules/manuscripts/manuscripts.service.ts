@@ -1,0 +1,279 @@
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import {
+  CreateManuscriptDto,
+  CreateManuscriptVersionDto,
+  UpdateManuscriptVersionDto,
+  UpdateQcChecklistDto,
+  TransitionManuscriptStatusDto,
+} from './dto/manuscript.dto';
+import {
+  UserRole,
+  ManuscriptStatus,
+  isValidManuscriptTransition,
+} from '@inzovate/shared';
+
+@Injectable()
+export class ManuscriptsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  private readonly VERSION_INCLUDE = {
+    author: {
+      select: { id: true, firstName: true, lastName: true, email: true },
+    },
+    documents: {
+      where: { deletedAt: null },
+      select: {
+        id: true,
+        filename: true,
+        mimeType: true,
+        sizeBytes: true,
+        category: true,
+        createdAt: true,
+      },
+    },
+  };
+
+  async findByProjectId(projectId: string, userId: string, role: string) {
+    const project = await this.prisma.project.findFirst({
+      where: { id: projectId, deletedAt: null },
+      include: { client: true },
+    });
+    if (!project) throw new NotFoundException('Project not found');
+
+    if (role === UserRole.CLIENT && project.client.userId !== userId) {
+      throw new ForbiddenException('Access denied to this project manuscript');
+    }
+
+    return this.prisma.manuscript.findUnique({
+      where: { projectId },
+      include: {
+        versions: {
+          orderBy: { versionNumber: 'desc' },
+          include: this.VERSION_INCLUDE,
+        },
+      },
+    });
+  }
+
+  async findOne(id: string, userId: string, role: string) {
+    const manuscript = await this.prisma.manuscript.findUnique({
+      where: { id },
+      include: {
+        project: {
+          include: { client: true },
+        },
+        versions: {
+          orderBy: { versionNumber: 'desc' },
+          include: this.VERSION_INCLUDE,
+        },
+      },
+    });
+
+    if (!manuscript) throw new NotFoundException('Manuscript not found');
+
+    if (role === UserRole.CLIENT && manuscript.project.client.userId !== userId) {
+      throw new ForbiddenException('Access denied to this manuscript');
+    }
+
+    return manuscript;
+  }
+
+  async findVersion(versionId: string, userId: string, role: string) {
+    const version = await this.prisma.manuscriptVersion.findUnique({
+      where: { id: versionId },
+      include: {
+        ...this.VERSION_INCLUDE,
+        manuscript: {
+          include: {
+            project: {
+              include: { client: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!version) throw new NotFoundException('Manuscript version not found');
+
+    if (role === UserRole.CLIENT && version.manuscript.project.client.userId !== userId) {
+      throw new ForbiddenException('Access denied to this manuscript version');
+    }
+
+    return version;
+  }
+
+  async create(dto: CreateManuscriptDto, authorId: string) {
+    const project = await this.prisma.project.findFirst({
+      where: { id: dto.projectId, deletedAt: null },
+    });
+    if (!project) throw new NotFoundException('Project not found');
+
+    const existing = await this.prisma.manuscript.findUnique({
+      where: { projectId: dto.projectId },
+    });
+    if (existing) {
+      throw new BadRequestException('A manuscript already exists for this project. Create a new version instead.');
+    }
+
+    const wordCount = dto.content ? dto.content.trim().split(/\s+/).length : 0;
+
+    return this.prisma.$transaction(async (tx) => {
+      const manuscript = await tx.manuscript.create({
+        data: {
+          projectId: dto.projectId,
+          title: dto.title,
+          abstract: dto.abstract,
+          keywords: dto.keywords || [],
+        },
+      });
+
+      const version = await tx.manuscriptVersion.create({
+        data: {
+          manuscriptId: manuscript.id,
+          versionNumber: 1,
+          title: dto.title,
+          abstract: dto.abstract,
+          content: dto.content,
+          wordCount,
+          status: ManuscriptStatus.DRAFT,
+          changeNotes: dto.changeNotes || 'Initial manuscript creation (Draft V1)',
+          isLatest: true,
+          authorId,
+        },
+        include: this.VERSION_INCLUDE,
+      });
+
+      return { ...manuscript, versions: [version] };
+    });
+  }
+
+  async createNewVersion(manuscriptId: string, dto: CreateManuscriptVersionDto, authorId: string) {
+    const manuscript = await this.prisma.manuscript.findUnique({
+      where: { id: manuscriptId },
+      include: { versions: { orderBy: { versionNumber: 'desc' }, take: 1 } },
+    });
+    if (!manuscript) throw new NotFoundException('Manuscript not found');
+
+    const latestVer = manuscript.versions[0];
+    const nextVerNumber = latestVer ? latestVer.versionNumber + 1 : 1;
+    const wordCount = dto.wordCount || (dto.content ? dto.content.trim().split(/\s+/).length : 0);
+
+    return this.prisma.$transaction(async (tx) => {
+      // Mark all previous versions as not latest
+      await tx.manuscriptVersion.updateMany({
+        where: { manuscriptId },
+        data: { isLatest: false },
+      });
+
+      const newVersion = await tx.manuscriptVersion.create({
+        data: {
+          manuscriptId,
+          versionNumber: nextVerNumber,
+          title: dto.title,
+          abstract: dto.abstract ?? latestVer?.abstract,
+          content: dto.content ?? latestVer?.content,
+          wordCount,
+          status: ManuscriptStatus.DRAFT,
+          changeNotes: dto.changeNotes,
+          isLatest: true,
+          authorId,
+        },
+        include: this.VERSION_INCLUDE,
+      });
+
+      // Also update manuscript top-level title
+      await tx.manuscript.update({
+        where: { id: manuscriptId },
+        data: { title: dto.title },
+      });
+
+      return newVersion;
+    });
+  }
+
+  async updateVersion(versionId: string, dto: UpdateManuscriptVersionDto, userId: string, role: string) {
+    const version = await this.prisma.manuscriptVersion.findUnique({
+      where: { id: versionId },
+    });
+    if (!version) throw new NotFoundException('Manuscript version not found');
+
+    if (version.status !== ManuscriptStatus.DRAFT && role !== UserRole.SUPER_ADMIN) {
+      throw new BadRequestException('Only DRAFT versions can be modified directly. Create a new version for major revisions.');
+    }
+
+    const wordCount = dto.wordCount || (dto.content ? dto.content.trim().split(/\s+/).length : version.wordCount);
+
+    return this.prisma.manuscriptVersion.update({
+      where: { id: versionId },
+      data: {
+        ...dto,
+        wordCount,
+      },
+      include: this.VERSION_INCLUDE,
+    });
+  }
+
+  async updateQcChecklist(versionId: string, dto: UpdateQcChecklistDto) {
+    const version = await this.prisma.manuscriptVersion.findUnique({
+      where: { id: versionId },
+    });
+    if (!version) throw new NotFoundException('Manuscript version not found');
+
+    return this.prisma.manuscriptVersion.update({
+      where: { id: versionId },
+      data: {
+        qcChecklist: dto.qcChecklist,
+        status: dto.status,
+        qcNotes: dto.qcNotes,
+      },
+      include: this.VERSION_INCLUDE,
+    });
+  }
+
+  async transitionStatus(
+    versionId: string,
+    dto: TransitionManuscriptStatusDto,
+    userId: string,
+    role: UserRole,
+  ) {
+    const version = await this.prisma.manuscriptVersion.findUnique({
+      where: { id: versionId },
+      include: {
+        manuscript: {
+          include: { project: { include: { client: true } } },
+        },
+      },
+    });
+    if (!version) throw new NotFoundException('Manuscript version not found');
+
+    if (role === UserRole.CLIENT) {
+      if (version.manuscript.project.client.userId !== userId) {
+        throw new ForbiddenException('You cannot review this manuscript');
+      }
+    }
+
+    const currentStatus = version.status as ManuscriptStatus;
+    const targetStatus = dto.status;
+
+    if (!isValidManuscriptTransition(currentStatus, targetStatus, role) && role !== UserRole.SUPER_ADMIN) {
+      throw new BadRequestException(
+        `Transition from ${currentStatus} to ${targetStatus} is not allowed for role ${role}`,
+      );
+    }
+
+    return this.prisma.manuscriptVersion.update({
+      where: { id: versionId },
+      data: {
+        status: targetStatus,
+        changeNotes: dto.notes ? `${version.changeNotes || ''}\n[Status Change]: ${dto.notes}` : version.changeNotes,
+      },
+      include: this.VERSION_INCLUDE,
+    });
+  }
+}
