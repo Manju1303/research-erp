@@ -31,14 +31,14 @@ export class DashboardService {
           where: {
             clientId: client.id,
             deletedAt: null,
-            status: { notIn: [ProjectStatus.CLOSED, ProjectStatus.CANCELLED] },
+            status: { notIn: [ProjectStatus.COMPLETED, ProjectStatus.CANCELLED] },
           },
         }),
         this.prisma.project.count({
           where: {
             clientId: client.id,
             deletedAt: null,
-            status: ProjectStatus.CLOSED,
+            status: ProjectStatus.COMPLETED,
           },
         }),
         this.prisma.manuscriptVersion.count({
@@ -189,7 +189,7 @@ export class DashboardService {
       this.prisma.project.count({
         where: {
           deletedAt: null,
-          status: { notIn: [ProjectStatus.CLOSED, ProjectStatus.CANCELLED] },
+          status: { notIn: [ProjectStatus.COMPLETED, ProjectStatus.CANCELLED] },
         },
       }),
       this.prisma.client.count({ where: { deletedAt: null } }),

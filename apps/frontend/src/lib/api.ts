@@ -40,6 +40,7 @@ class ApiClient {
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const method = (options.method || 'GET').toUpperCase();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
@@ -57,13 +58,31 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Request failed with status ${response.status}`);
+        const message = Array.isArray(errorData.message)
+          ? errorData.message.join(', ')
+          : errorData.message || `Request failed with status ${response.status}`;
+        throw new Error(message);
       }
 
       const json = await response.json();
       return json.data !== undefined ? json.data : json;
     } catch (err: any) {
-      console.warn(`[API] Fallback for ${endpoint}:`, err.message);
+      // If it's a real server response error (e.g. 400, 401, 403, 409), always throw it
+      const isNetworkOffline = !err.message || 
+        err.message.includes('Failed to fetch') || 
+        err.message.includes('NetworkError') || 
+        err.message.includes('fetch failed');
+
+      if (!isNetworkOffline) {
+        throw err;
+      }
+
+      // If backend is unreachable and user is attempting a mutation, warn and notify
+      if (method !== 'GET') {
+        throw new Error(`Backend service unreachable at ${API_BASE}. Ensure the NestJS backend is running on port 4000.`);
+      }
+
+      console.warn(`[API Offline Fallback] ${endpoint}:`, err.message);
       return this.getMockResponse(endpoint, options) as T;
     }
   }

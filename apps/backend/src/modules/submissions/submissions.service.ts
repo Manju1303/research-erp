@@ -41,7 +41,7 @@ export class SubmissionsService {
       },
     },
     revisions: {
-      orderBy: { cycleNumber: 'desc' },
+      orderBy: { cycleNumber: 'desc' as const },
     },
     publication: true,
   };

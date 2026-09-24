@@ -30,15 +30,15 @@ export class UsersService {
     }
     if (query.roleId) where.roleId = query.roleId;
 
-    const [data, total] = await Promise.all([
+    const [rawUsers, total] = await Promise.all([
       this.prisma.user.findMany({
         where, skip, take, orderBy,
         include: this.USER_INCLUDE,
-        omit: { passwordHash: true } as any,
       }),
       this.prisma.user.count({ where }),
     ]);
 
+    const data = rawUsers.map(({ passwordHash, ...u }) => u);
     return { data, meta: buildPaginationMeta(total, query.page ?? 1, query.limit ?? 20) };
   }
 

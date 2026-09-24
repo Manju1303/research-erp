@@ -49,7 +49,7 @@ export class AuditInterceptor implements NestInterceptor {
         next: async () => {
           try {
             const auditCtx = this.buildAuditContext(request, user);
-            await this.prisma.auditLog.create({ data: auditCtx });
+            await this.prisma.auditLog.create({ data: auditCtx as any });
           } catch (err) {
             // Audit failure must NEVER break the main request
             this.logger.error('Failed to write audit log', err);
@@ -67,7 +67,7 @@ export class AuditInterceptor implements NestInterceptor {
                   statusCode: err?.status ?? 500,
                   durationMs: Date.now() - startedAt,
                 },
-              },
+              } as any,
             });
           } catch (auditErr) {
             this.logger.error('Failed to write error audit log', auditErr);

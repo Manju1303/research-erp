@@ -46,24 +46,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    // Set initial mock or stored user
-    setUser({
-      id: 'demo-user-id',
-      email: currentPreset.email,
-      firstName: currentPreset.name.split(' ')[0],
-      lastName: currentPreset.name.split(' ')[1] || '',
-      role: {
-        id: 'role-' + currentPreset.role,
-        name: currentPreset.role,
-        displayName: currentPreset.displayName,
-      },
-    });
+    // Attempt automatic real authentication with backend
+    const authenticatePreset = async () => {
+      try {
+        const res: any = await api.request('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: currentPreset.email, password: 'Password123!' }),
+        });
+        const token = res?.accessToken || res?.tokens?.accessToken;
+        if (token) {
+          api.setToken(token);
+          if (res.user) {
+            setUser(res.user);
+            return;
+          }
+        }
+      } catch (e) {
+        // Fall back to preset profile if backend is not yet active
+      }
+
+      setUser({
+        id: 'user-' + currentPreset.role,
+        email: currentPreset.email,
+        firstName: currentPreset.name.split(' ')[0],
+        lastName: currentPreset.name.split(' ')[1] || '',
+        role: {
+          id: 'role-' + currentPreset.role,
+          name: currentPreset.role,
+          displayName: currentPreset.displayName,
+        },
+      });
+    };
+
+    authenticatePreset();
   }, [currentPreset]);
 
-  const switchRole = (roleKey: string) => {
+  const switchRole = async (roleKey: string) => {
     const found = ROLE_PRESETS.find((p) => p.role === roleKey);
     if (found) {
       setCurrentPreset(found);
+      try {
+        const res: any = await api.request('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: found.email, password: 'Password123!' }),
+        });
+        const token = res?.accessToken || res?.tokens?.accessToken;
+        if (token) {
+          api.setToken(token);
+          if (res.user) setUser(res.user);
+        }
+      } catch (err) {
+        console.warn('Real backend authentication skipped:', err);
+      }
     }
   };
 
@@ -78,8 +112,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         body: JSON.stringify({ email, password: pass }),
       });
-      if (res?.tokens?.accessToken) {
-        api.setToken(res.tokens.accessToken);
+      const token = res?.accessToken || res?.tokens?.accessToken;
+      if (token) {
+        api.setToken(token);
         setUser(res.user);
         return true;
       }

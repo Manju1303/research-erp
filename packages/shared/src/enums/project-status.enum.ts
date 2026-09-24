@@ -19,11 +19,14 @@ export enum ProjectStatus {
   ACCEPTED = 'ACCEPTED',
   PUBLISHED = 'PUBLISHED',
   COMPLETED = 'COMPLETED',
+  ON_HOLD = 'ON_HOLD',
+  CANCELLED = 'CANCELLED',
   // Backward compatibility alias
   REQUIREMENT_SUBMITTED = 'NEW_REQUIREMENT',
   TOPIC_FINALIZED = 'TOPIC_FINALIZATION',
   INTERNAL_QC = 'INTERNAL_REVIEW',
   CLIENT_APPROVED = 'FINAL_MANUSCRIPT',
+  JOURNAL_MATCHING = 'JOURNAL_SELECTION',
 }
 
 export const PROJECT_STATUS_LABELS: Record<string, string> = {
@@ -44,4 +47,6 @@ export const PROJECT_STATUS_LABELS: Record<string, string> = {
   [ProjectStatus.ACCEPTED]: 'Accepted',
   [ProjectStatus.PUBLISHED]: 'Published',
   [ProjectStatus.COMPLETED]: 'Completed',
+  [ProjectStatus.ON_HOLD]: 'On Hold',
+  [ProjectStatus.CANCELLED]: 'Cancelled',
 };

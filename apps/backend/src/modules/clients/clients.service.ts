@@ -150,11 +150,11 @@ export class ClientsService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      let user = existingUser;
-      if (!user) {
+      let userId = existingUser?.id;
+      if (!userId) {
         const rawPassword = dto.temporaryPassword || 'Welcome@Inzovate123!';
         const passwordHash = await bcrypt.hash(rawPassword, 12);
-        user = await tx.user.create({
+        const newUser = await tx.user.create({
           data: {
             email: emailLower,
             passwordHash,
@@ -164,13 +164,13 @@ export class ClientsService {
             orcidId: dto.orcidId,
             roleId: clientRole!.id,
           },
-          include: { role: true } as any,
         });
+        userId = newUser.id;
       }
 
       return tx.client.create({
         data: {
-          userId: user.id,
+          userId,
           organization: dto.organization,
           designation: dto.designation,
           fieldOfStudy: dto.fieldOfStudy,
