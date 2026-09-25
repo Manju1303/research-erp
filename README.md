@@ -343,11 +343,11 @@ Every mutation in the system emits a typed domain event, enabling reactive autom
 
 ---
 
-## Live Cloud Publishing (Vercel + Render / Railway)
+## Live Cloud Publishing (Vercel + Render)
 
 Scriptara ERP is engineered for seamless cloud deployment:
 - **Frontend**: One-click deploy on [Vercel](https://vercel.com).
-- **Backend & Database**: One-click deploy on [Render](https://render.com) or on [Railway](https://railway.app).
+- **Backend & Database**: One-click deploy on [Render](https://render.com) using the included Infrastructure-as-Code blueprint (`render.yaml`).
 
 For step-by-step instructions with environment variables, read the **[Production Publishing Guide](DEPLOYMENT_GUIDE.md)**.
 

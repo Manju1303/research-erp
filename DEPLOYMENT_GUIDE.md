@@ -2,7 +2,7 @@
 
 This guide walks you through publishing the **Scriptara Research Publication Management ERP** live to the web using the recommended enterprise stack:
 - **Frontend**: [Vercel](https://vercel.com) (Next.js 14 edge hosting, global CDN, instant preview deployments)
-- **Backend**: [Render](https://render.com) or [Railway](https://railway.app) (NestJS 10 container / web service)
+- **Backend**: [Render](https://render.com) (NestJS 10 container / web service)
 - **Database**: Managed PostgreSQL 16 (with connection pooling and automatic SSL)
 
 ---
@@ -15,7 +15,7 @@ This guide walks you through publishing the **Scriptara Research Publication Man
          │
          │  (HTTPS REST calls with JWT Bearer Auth)
          ▼
-  [ Render / Railway ]  <--- NestJS 10 API
+  [ Render Web Service ]  <--- NestJS 10 API
   https://inzovate-backend.onrender.com/api/v1
          │
          │  (Internal SSL Connection)
@@ -110,22 +110,6 @@ Once published, visit your Vercel URL and log in using any of the 9 pre-configur
   - **Quality Analyst (QC)**: `marcus.v@inzovate.com`
   - **Publication Executive**: `priya.s@inzovate.com`
   - **Client / Author (Stanford)**: `reynolds@stanford.edu`
-
----
-
-## 🚂 Alternative Option: Deploying on Railway
-
-If you prefer Railway over Render:
-
-1. Visit [railway.app](https://railway.app) $\rightarrow$ **New Project** $\rightarrow$ **Deploy from GitHub repo**.
-2. Select `Manju1303/research-erp`.
-3. Click **+ New** $\rightarrow$ **Database** $\rightarrow$ **Add PostgreSQL**.
-4. In your Web Service settings:
-   - Root Directory: Leave as `/` (monorepo root).
-   - Build Command: `npm install && npx prisma generate --schema=apps/backend/prisma/schema.prisma && npm run build --prefix apps/backend`
-   - Start Command: `npx prisma migrate deploy --schema=apps/backend/prisma/schema.prisma && npm run db:seed --prefix apps/backend && npm run start --prefix apps/backend`
-5. Connect `DATABASE_URL` from the PostgreSQL service.
-6. Copy the public Railway domain generated for your web service and set it as `NEXT_PUBLIC_API_URL` on Vercel.
 
 ---
 
