@@ -19,12 +19,14 @@ import {
   isValidManuscriptTransition,
 } from '@inzovate/shared';
 import { DomainEvents } from '../automation/events/domain-events';
+import { PlagiarismService } from './plagiarism/plagiarism.service';
 
 @Injectable()
 export class ManuscriptsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly plagiarismService: PlagiarismService,
   ) {}
 
   private readonly VERSION_INCLUDE = {
@@ -245,16 +247,79 @@ export class ManuscriptsService {
     });
   }
 
+  async scanPlagiarism(versionId: string) {
+    const version = await this.prisma.manuscriptVersion.findUnique({
+      where: { id: versionId },
+      include: { manuscript: true },
+    });
+    if (!version) throw new NotFoundException('Manuscript version not found');
+
+    const scanResult = await this.plagiarismService.scanManuscript({
+      manuscriptId: version.id,
+      title: version.title,
+      abstract: version.abstract || '',
+      wordCount: version.wordCount ?? undefined,
+    });
+
+    const currentChecklist = (version.qcChecklist as Record<string, any>) || {};
+    const updatedChecklist = {
+      ...currentChecklist,
+      plagiarismVerification: scanResult.passedThreshold,
+      similarityScorePercent: scanResult.similarityScorePercent,
+      plagiarismScanId: scanResult.scanId,
+      plagiarismReportUrl: scanResult.reportUrl,
+      plagiarismProvider: scanResult.provider,
+      plagiarismScannedAt: scanResult.scannedAt,
+      plagiarismMatchedSources: scanResult.matchedSources,
+    };
+
+    const updated = await this.prisma.manuscriptVersion.update({
+      where: { id: versionId },
+      data: {
+        qcChecklist: updatedChecklist,
+        qcNotes: `${version.qcNotes || ''}\n[Automated Plagiarism Check via ${scanResult.provider}]: Similarity ${scanResult.similarityScorePercent}% (Threshold: ${scanResult.thresholdMaxPercent}%). Status: ${scanResult.passedThreshold ? 'PASSED' : 'FLAGGED'}`.trim(),
+      },
+      include: this.VERSION_INCLUDE,
+    });
+
+    return {
+      scanResult,
+      manuscriptVersion: updated,
+    };
+  }
+
   async updateQcChecklist(versionId: string, dto: UpdateQcChecklistDto) {
     const version = await this.prisma.manuscriptVersion.findUnique({
       where: { id: versionId },
     });
     if (!version) throw new NotFoundException('Manuscript version not found');
 
+    let finalChecklist = { ...dto.qcChecklist };
+
+    // Auto-populate / verify Item 8 (plagiarism verification) if not verified by scan
+    if (finalChecklist.similarityScorePercent === undefined || !finalChecklist.plagiarismReportUrl) {
+      const scanResult = await this.plagiarismService.scanManuscript({
+        manuscriptId: version.id,
+        title: version.title,
+        abstract: version.abstract || '',
+        wordCount: version.wordCount ?? undefined,
+      });
+
+      finalChecklist = {
+        ...finalChecklist,
+        plagiarismVerification: scanResult.passedThreshold,
+        similarityScorePercent: scanResult.similarityScorePercent,
+        plagiarismScanId: scanResult.scanId,
+        plagiarismReportUrl: scanResult.reportUrl,
+        plagiarismProvider: scanResult.provider,
+        plagiarismScannedAt: scanResult.scannedAt,
+      };
+    }
+
     return this.prisma.manuscriptVersion.update({
       where: { id: versionId },
       data: {
-        qcChecklist: dto.qcChecklist,
+        qcChecklist: finalChecklist,
         status: dto.status,
         qcNotes: dto.qcNotes,
       },

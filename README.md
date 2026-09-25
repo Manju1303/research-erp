@@ -444,21 +444,41 @@ The backend provides complete OpenAPI / Swagger documentation at `/api/docs`. Ke
 
 ---
 
-## Security & Data Governance
+## Security & Enterprise Data Governance
 
-1. **Authentication & Token Storage**:
+1. **Authentication & Refresh Token Rotation with Reuse Detection (RFC 6819)**:
    - Access tokens signed with HMAC-SHA256 (`900s` TTL).
-   - Refresh tokens hashed with `bcrypt` (12 rounds) and stored in the database for instant session revocation on logout.
-2. **Strict Client Data Sanitization**:
-   - Internal staff discussions, quality analyst remarks, and vendor notes are stripped via DTO serialization filters before serving client accounts.
-3. **Automated Audit Interceptor**:
+   - Refresh tokens hashed with `bcrypt` (12 rounds) and tracked in the database.
+   - Every refresh issues a new token pair and invalidates the previous token.
+   - **Reuse Detection**: If an already-revoked refresh token is re-submitted, the entire session family for that user is terminated immediately and a critical security audit record is logged.
+2. **Multi-Factor Authentication (MFA / TOTP)**:
+   - Mandatory TOTP MFA (RFC 6238) for high-privilege roles: `super_admin`, `finance`, `operations_manager`, and `research_manager`.
+   - Generates standard Base32 secrets compatible with Google Authenticator, Microsoft Authenticator, and 1Password.
+   - Setup via `/api/v1/auth/mfa/enable` and challenge verification via `/api/v1/auth/mfa/verify`.
+3. **Plagiarism & Authenticity Verification (Item 8 in QC)**:
+   - Automated similarity engine with external Turnitin / iThenticate API integration and algorithmic scholarly analysis fallback.
+   - Auto-populates similarity score percentage, match sources, and report URL in QC Item 8; flags manuscripts exceeding 15% threshold.
+4. **Document Upload Anti-Malware & Binary Header Inspection**:
+   - Deep inspection of binary magic bytes before saving any document to storage:
+     - Enforces legitimate headers (`%PDF-`, `PK\x03\x04`, `\x89PNG`, `\xFF\xD8\xFF`).
+     - Blocks executable binaries (Windows PE/MZ, Linux ELF, Java Bytecode `.class`, Mach-O).
+     - Scans for embedded script injections (`<script>`, `<?php`, `eval(base64_decode`, `/bin/sh`).
+     - Detects standard EICAR antivirus test signatures.
+5. **Strict Production CORS Whitelist**:
+   - Explicit comma-separated domain allowlist in production environment (`NODE_ENV=production`).
+   - Wildcards (`*`), arbitrary preview domains, and localhost origins are strictly forbidden in production.
+6. **Gated Seeded Demo Accounts**:
+   - Database seeding script (`seed.ts`) strictly refuses to execute in `NODE_ENV=production` to prevent mock credentials from entering production.
+   - All demo accounts are created with `mustResetPassword: true` forcing a password change on first authentication.
+7. **Real-time Event Push (Socket.IO Gateway)**:
+   - Dedicated WebSocket gateway (`/realtime`) authenticated via JWT handshake.
+   - Automatically synchronizes project status transitions, QC approvals, submission updates, task assignments, and notifications directly to connected browsers without manual polling.
+8. **Automated Audit Interceptor**:
    - Every mutating HTTP request (`POST`, `PUT`, `PATCH`, `DELETE`) is captured asynchronously by `AuditInterceptor`, recording user identity, role, IP address, user agent, action target, and duration.
-4. **Input Sanitization & Validation**:
+9. **Input Sanitization & Validation**:
    - Global NestJS `ValidationPipe` with `whitelist: true` and `forbidNonWhitelisted: true` preventing parameter injection attacks.
-5. **Rate Limiting**:
-   - Three-tier `ThrottlerModule` guard (10 req/sec, 50 req/10s, 200 req/min) applied globally to prevent brute-force and DDoS attacks.
-6. **Security Headers**:
-   - `Helmet` middleware sets strict HTTP security headers (CSP, X-Frame-Options, HSTS, etc.) on all responses.
+10. **Rate Limiting & Security Headers**:
+    - Three-tier `ThrottlerModule` guard (10 req/sec, 50 req/10s, 200 req/min) and `Helmet` security headers configured globally.
 
 ---
 

@@ -22,6 +22,7 @@ import { CommunicationsModule } from './modules/communications/communications.mo
 import { ReportsModule } from './modules/reports/reports.module';
 import { HealthModule } from './modules/health/health.module';
 import { AutomationModule } from './modules/automation/automation.module';
+import { RealtimeModule } from './modules/realtime/realtime.module';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { appConfig } from './config/app.config';
 import { jwtConfig } from './config/jwt.config';
@@ -69,6 +70,9 @@ import { redisConfig } from './config/redis.config';
 
     // Event-driven automation engine
     AutomationModule,
+
+    // Real-time WebSocket Gateway
+    RealtimeModule,
   ],
   providers: [
     // Apply rate limiting globally

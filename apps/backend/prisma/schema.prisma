@@ -95,12 +95,15 @@ model User {
   phone         String?
   avatarUrl     String?
   orcidId       String?                       // ORCID iD (Phase 2 integration)
-  isActive      Boolean   @default(true)
-  emailVerified Boolean   @default(false)
-  lastLoginAt   DateTime? @db.Timestamptz
-  createdAt     DateTime  @default(now()) @db.Timestamptz
-  updatedAt     DateTime  @updatedAt @db.Timestamptz
-  deletedAt     DateTime? @db.Timestamptz     // soft delete
+  isActive            Boolean   @default(true)
+  emailVerified       Boolean   @default(false)
+  mfaEnabled          Boolean   @default(false)
+  mfaSecret           String?
+  mustResetPassword   Boolean   @default(false)
+  lastLoginAt         DateTime? @db.Timestamptz
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+  deletedAt           DateTime? @db.Timestamptz     // soft delete
 
   roleId String
   role   Role   @relation(fields: [roleId], references: [id])

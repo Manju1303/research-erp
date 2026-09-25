@@ -63,20 +63,32 @@ export class TokenService {
     }
   }
 
-  async findAndValidateRefreshToken(userId: string, rawToken: string) {
-    const tokens = await this.prisma.refreshToken.findMany({
-      where: {
-        userId,
-        revokedAt: null,
-        expiresAt: { gt: new Date() },
-      },
+  async findTokenWithReuseDetection(userId: string, rawToken: string) {
+    const allTokens = await this.prisma.refreshToken.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
     });
 
-    for (const token of tokens) {
+    for (const token of allTokens) {
       const isMatch = await bcrypt.compare(rawToken, token.tokenHash);
-      if (isMatch) return token;
+      if (isMatch) {
+        if (token.revokedAt !== null) {
+          return { status: 'REUSED' as const, token };
+        }
+        if (token.expiresAt <= new Date()) {
+          return { status: 'EXPIRED' as const, token };
+        }
+        return { status: 'VALID' as const, token };
+      }
     }
-    return null;
+
+    return { status: 'NOT_FOUND' as const, token: null };
+  }
+
+  async findAndValidateRefreshToken(userId: string, rawToken: string) {
+    const result = await this.findTokenWithReuseDetection(userId, rawToken);
+    return result.status === 'VALID' ? result.token : null;
   }
 
   async revokeRefreshToken(tokenId: string) {

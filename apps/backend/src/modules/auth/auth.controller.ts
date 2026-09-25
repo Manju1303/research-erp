@@ -59,6 +59,42 @@ export class AuthController {
     return this.authService.refresh(dto.refreshToken, req.ip, req.headers['user-agent']);
   }
 
+  @Public()
+  @Post('mfa/enable')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Complete MFA enrollment with 6-digit verification code' })
+  @ApiResponse({ status: 200, description: 'MFA enabled and session authenticated' })
+  async enableMfa(
+    @Body() dto: { setupToken: string; code: string },
+    @Req() req: Request,
+  ) {
+    return this.authService.enableMfa(dto.setupToken, dto.code, req.ip, req.headers['user-agent']);
+  }
+
+  @Public()
+  @Post('mfa/verify')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ short: { limit: 5, ttl: 60000 } })
+  @ApiOperation({ summary: 'Verify MFA challenge during high-privilege login' })
+  @ApiResponse({ status: 200, description: 'MFA verified and session authenticated' })
+  async verifyMfa(
+    @Body() dto: { mfaChallengeToken: string; code: string },
+    @Req() req: Request,
+  ) {
+    return this.authService.verifyMfa(dto.mfaChallengeToken, dto.code, req.ip, req.headers['user-agent']);
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Change or reset account password' })
+  async changePassword(
+    @CurrentUser('id') userId: string,
+    @Body() dto: { currentPassword: string; newPassword: string },
+  ) {
+    return this.authService.changePassword(userId, dto.currentPassword, dto.newPassword);
+  }
+
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('access-token')

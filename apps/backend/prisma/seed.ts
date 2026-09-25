@@ -293,7 +293,18 @@ const JOURNAL_SEEDS = [
 ];
 
 async function main() {
-  console.log('🌱 Starting Inzovate Enterprise Database Seed...');
+  // STRICT PRODUCTION SECURITY GATE
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PROD_SEED !== 'true') {
+    console.error('========================================================================');
+    console.error('⛔ FATAL SECURITY GUARD: DATABASE SEED ABORTED');
+    console.error('Populating demo accounts and default passwords ("Password123!") is strictly');
+    console.error('prohibited in production environments (NODE_ENV=production).');
+    console.error('To initialize production, use the admin onboarding CLI or invite workflow.');
+    console.error('========================================================================');
+    process.exit(1);
+  }
+
+  console.log('🌱 Starting Scriptara Enterprise Database Seed...');
 
   // 1. Seed Permissions
   console.log('  [1/10] Upserting permissions...');
@@ -359,6 +370,7 @@ async function main() {
         lastName: u.lastName,
         phone: u.phone,
         roleId,
+        mustResetPassword: true,
       },
       create: {
         email: u.email,
@@ -368,6 +380,7 @@ async function main() {
         phone: u.phone,
         emailVerified: true,
         isActive: true,
+        mustResetPassword: true,
         roleId,
       },
     });

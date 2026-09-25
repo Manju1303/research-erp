@@ -2,17 +2,20 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import { UploadDocumentDto, DocumentAccessLevel } from './dto/document.dto';
 import { UserRole } from '@inzovate/shared';
+import { MalwareScannerService } from './security/malware-scanner.service';
 
 @Injectable()
 export class DocumentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly malwareScanner: MalwareScannerService,
   ) {}
 
   private sanitizeDocument(doc: any) {
@@ -82,11 +85,25 @@ export class DocumentsService {
     dto: UploadDocumentDto,
     uploadedById: string,
   ) {
+    // Security & Anti-Malware Scan
+    const scanResult = await this.malwareScanner.scan({
+      buffer: file.buffer,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+    });
+
+    if (!scanResult.isClean) {
+      throw new BadRequestException(
+        `File rejected by security scanner: ${scanResult.threatName}. Upload of unauthorized binaries or malicious scripts is prohibited.`,
+      );
+    }
+
     const saved = await this.storageService.saveFile({
       fieldname: file.fieldname,
       originalname: file.originalname,
       encoding: file.encoding,
-      mimetype: file.mimetype,
+      mimetype: scanResult.verifiedMimeType || file.mimetype,
       size: file.size,
       buffer: file.buffer,
     });

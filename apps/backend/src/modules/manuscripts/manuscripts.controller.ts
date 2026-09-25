@@ -104,6 +104,13 @@ export class ManuscriptsController {
     return this.manuscriptsService.updateQcChecklist(versionId, dto);
   }
 
+  @Post('versions/:versionId/plagiarism-scan')
+  @RequirePermissions('manuscripts:qc_update', 'manuscripts:read')
+  @ApiOperation({ summary: 'Run real-time Turnitin/iThenticate plagiarism & similarity scan' })
+  scanPlagiarism(@Param('versionId') versionId: string) {
+    return this.manuscriptsService.scanPlagiarism(versionId);
+  }
+
   @Post('versions/:versionId/transition')
   @RequirePermissions('manuscripts:update', 'manuscripts:approve')
   @ApiOperation({ summary: 'Transition manuscript version lifecycle status' })

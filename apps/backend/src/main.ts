@@ -21,25 +21,41 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
 
+  const isProduction = config.get<string>('NODE_ENV') === 'production';
   const frontendUrlConfig = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
-  const allowedOrigins = frontendUrlConfig.split(',').map((u) => u.trim());
+  const configuredOrigins = frontendUrlConfig
+    .split(',')
+    .map((u) => u.trim())
+    .filter((u) => Boolean(u) && (!isProduction || u !== '*'));
 
   app.enableCors({
     origin: (origin, callback) => {
       // Allow requests with no origin (curl, mobile, server-to-server)
       if (!origin) return callback(null, true);
 
-      // Match configured origins, wildcard, localhost, or any vercel.app preview
-      const isAllowed =
-        allowedOrigins.includes('*') ||
-        allowedOrigins.includes(origin) ||
-        origin.endsWith('.vercel.app') ||
-        origin.startsWith('http://localhost:');
+      if (isProduction) {
+        // STRICT PRODUCTION CORS: exact match against explicit allowlist only.
+        // No wildcards, no arbitrary preview domains, no localhost.
+        if (configuredOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(
+          new Error(`Production CORS policy violation: Origin '${origin}' is not in the explicit allowlist.`),
+          false,
+        );
+      }
 
-      if (isAllowed) {
+      // DEVELOPMENT CORS: allow configured origins and local development hosts
+      const isDevAllowed =
+        configuredOrigins.includes('*') ||
+        configuredOrigins.includes(origin) ||
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://127.0.0.1:');
+
+      if (isDevAllowed) {
         return callback(null, true);
       }
-      return callback(new Error(`Origin ${origin} not permitted by CORS policy`), false);
+      return callback(new Error(`Development CORS violation: Origin '${origin}' not permitted`), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
