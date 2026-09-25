@@ -11,6 +11,8 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "test:all": "npm test --workspace=apps/backend",
+    "test:cov": "npm run test:cov --workspace=apps/backend",
     "db:migrate": "turbo run db:migrate --filter=backend",
     "db:seed": "turbo run db:seed --filter=backend",
     "db:studio": "turbo run db:studio --filter=backend",

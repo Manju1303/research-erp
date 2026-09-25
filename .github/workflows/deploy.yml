@@ -30,6 +30,9 @@ jobs:
       - name: Verify Shared Types
         run: npx tsc -p packages/shared/tsconfig.json --noEmit
 
+      - name: Run Automated Test Suite (Unit & QA Gates)
+        run: npm run test:all
+
       - name: Build NestJS Backend
         run: |
           npx tsc -p apps/backend/tsconfig.json --noEmit
