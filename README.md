@@ -410,9 +410,33 @@ npm run dev
 
 The system will start with:
 - **Frontend App**: [http://localhost:3000](http://localhost:3000)
+- **Login Portal**: [http://localhost:3000/login](http://localhost:3000/login)
 - **Backend API**: [http://localhost:4000/api/v1](http://localhost:4000/api/v1)
 - **Interactive Swagger Docs**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
 - **pgAdmin Database Console**: [http://localhost:5050](http://localhost:5050) *(User: `admin@scriptara.local`, Pass: `pgadmin_dev_pass`)*
+
+---
+
+### Default Login Credentials for All Roles
+
+All seeded demo accounts use the standard test password:
+> **Universal Test Password:** `Password123!`
+
+You can sign in directly at [`/login`](http://localhost:3000/login) with any of the 9 seeded enterprise roles:
+
+| # | Enterprise Role | Persona Name | Primary Login Email | Alternative Email | Key RBAC Capabilities |
+|:---:|:---|:---|:---|:---|:---|
+| 1 | **Super Administrator** | Alex Vance | `admin@scriptara.com` | `admin@inzovate.com` | Full root access, user/role management, audit ledger, all module CRUD |
+| 2 | **Operations Manager** | David Mercer | `david.m@scriptara.com` | `david.m@inzovate.com` | Lifecycle state transitions, staff allocation, workload metrics, approvals |
+| 3 | **Research Manager** | Elena Rostova | `elena.r@scriptara.com` | `elena.r@inzovate.com` | Topic validation, task creation, manuscript reviews, author communications |
+| 4 | **Research Staff** | Dr. Sarah Chen | `sarah.c@scriptara.com` | `sarah.c@inzovate.com` | Manuscript drafting studio, task execution, document uploads |
+| 5 | **Quality Analyst (QC)** | Marcus Vance | `marcus.v@scriptara.com` | `marcus.v@inzovate.com` | 10-point QC gate verification, plagiarism & similarity checks (<15%) |
+| 6 | **Publication Executive** | Priya Sharma | `priya.s@scriptara.com` | `priya.s@inzovate.com` | Journal intelligence matching, portal submissions, revision tracking, DOIs |
+| 7 | **Client / Author** | Dr. John Reynolds | `reynolds@stanford.edu` | `client@scriptara.com` | Client portal, project milestones, version approval, payment receipts |
+| 8 | **Finance & Accounts** | Sophie Taylor | `sophie.t@scriptara.com` | `sophie.t@inzovate.com` | Invoices, payment reconciliation, financial milestone clearance, receipts |
+| 9 | **Executive Management** | Robert Stirling | `robert.s@scriptara.com` | `robert.s@inzovate.com` | High-level analytics, SLA reports, organizational audit trails, overview |
+
+*Note: In the web UI, you can also use the **Active Persona (RBAC)** dropdown or the **1-Click Quick Login** cards at `/login` to immediately switch personas without re-typing credentials.*
 
 ---
 

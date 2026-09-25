@@ -96,7 +96,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     api.setToken(null);
-    switchRole('super_admin');
+    setUser(null);
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   };
 
   const login = async (email: string, pass: string): Promise<boolean> => {

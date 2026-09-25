@@ -128,15 +128,42 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 // System Users (Matching Role Presets)
 // ─────────────────────────────────────────────
 const USER_SEEDS = [
+  // Super Administrator
+  { role: 'super_admin', email: 'admin@scriptara.com', firstName: 'Alex', lastName: 'Vance', phone: '+1 415 555 0101' },
   { role: 'super_admin', email: 'admin@inzovate.com', firstName: 'Alex', lastName: 'Vance', phone: '+1 415 555 0101' },
+
+  // Operations Manager
+  { role: 'operations_manager', email: 'david.m@scriptara.com', firstName: 'David', lastName: 'Mercer', phone: '+1 415 555 0102' },
   { role: 'operations_manager', email: 'david.m@inzovate.com', firstName: 'David', lastName: 'Mercer', phone: '+1 415 555 0102' },
+
+  // Research Manager
+  { role: 'research_manager', email: 'elena.r@scriptara.com', firstName: 'Elena', lastName: 'Rostova', phone: '+1 415 555 0103' },
   { role: 'research_manager', email: 'elena.r@inzovate.com', firstName: 'Elena', lastName: 'Rostova', phone: '+1 415 555 0103' },
+
+  // Research Staff
+  { role: 'research_staff', email: 'sarah.c@scriptara.com', firstName: 'Dr. Sarah', lastName: 'Chen', phone: '+1 415 555 0104' },
   { role: 'research_staff', email: 'sarah.c@inzovate.com', firstName: 'Dr. Sarah', lastName: 'Chen', phone: '+1 415 555 0104' },
+
+  // Quality Analyst
+  { role: 'quality_analyst', email: 'marcus.v@scriptara.com', firstName: 'Marcus', lastName: 'Vance', phone: '+1 415 555 0105' },
   { role: 'quality_analyst', email: 'marcus.v@inzovate.com', firstName: 'Marcus', lastName: 'Vance', phone: '+1 415 555 0105' },
+
+  // Publication Executive
+  { role: 'publication_executive', email: 'priya.s@scriptara.com', firstName: 'Priya', lastName: 'Sharma', phone: '+1 415 555 0106' },
   { role: 'publication_executive', email: 'priya.s@inzovate.com', firstName: 'Priya', lastName: 'Sharma', phone: '+1 415 555 0106' },
+
+  // Client / Author
   { role: 'client', email: 'reynolds@stanford.edu', firstName: 'Dr. John', lastName: 'Reynolds', phone: '+1 650 723 2300' },
+  { role: 'client', email: 'client@scriptara.com', firstName: 'Dr. John', lastName: 'Reynolds', phone: '+1 650 723 2300' },
+
+  // Finance & Accounts
+  { role: 'finance', email: 'sophie.t@scriptara.com', firstName: 'Sophie', lastName: 'Taylor', phone: '+1 415 555 0108' },
   { role: 'finance', email: 'sophie.t@inzovate.com', firstName: 'Sophie', lastName: 'Taylor', phone: '+1 415 555 0108' },
+
+  // Executive Management
+  { role: 'management', email: 'robert.s@scriptara.com', firstName: 'Robert', lastName: 'Stirling', phone: '+1 415 555 0109' },
   { role: 'management', email: 'robert.s@inzovate.com', firstName: 'Robert', lastName: 'Stirling', phone: '+1 415 555 0109' },
+
   // Additional Clients
   { role: 'client', email: 'wei.zhang@nus.edu.sg', firstName: 'Prof. Wei', lastName: 'Zhang', phone: '+65 6516 6666' },
   { role: 'client', email: 'astrid.l@ki.se', firstName: 'Astrid', lastName: 'Lindholm', phone: '+46 8 524 800 00' },
