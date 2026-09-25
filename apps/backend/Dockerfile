@@ -56,6 +56,7 @@ COPY --from=builder /app/packages/shared/dist ./packages/shared/dist 2>/dev/null
 COPY --from=builder /app/packages/shared/src ./packages/shared/src
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 COPY --from=builder /app/apps/backend/prisma ./apps/backend/prisma
+COPY apps/backend/start.js ./apps/backend/start.js
 
 # Expose port
 EXPOSE 4000
@@ -64,4 +65,4 @@ EXPOSE 4000
 WORKDIR /app/apps/backend
 
 # Start NestJS production server
-CMD ["node", "dist/main.js"]
+CMD ["node", "start.js"]
