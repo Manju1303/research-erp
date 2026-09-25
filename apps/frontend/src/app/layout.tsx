@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '../lib/auth-context';
-import { Sidebar } from '../components/Sidebar';
-import { Navbar } from '../components/Navbar';
+import { SidebarProvider } from '../lib/sidebar-context';
+import { AppShell } from '../components/AppShell';
 
 export const metadata: Metadata = {
   title: 'Scriptara — Research Publication Management Platform',
@@ -18,15 +18,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <div style={{ display: 'flex', minHeight: '100vh', width: '100%', backgroundColor: 'var(--bg-primary)' }}>
-            <Sidebar />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <Navbar />
-              <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-                {children}
-              </main>
-            </div>
-          </div>
+          <SidebarProvider>
+            <AppShell>{children}</AppShell>
+          </SidebarProvider>
         </AuthProvider>
       </body>
     </html>
