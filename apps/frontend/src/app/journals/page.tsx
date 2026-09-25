@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import { Search, Sparkles, AlertTriangle, Check, X, BookOpen } from 'lucide-react';
 
 export default function JournalsIntelligencePage() {
   const [journals, setJournals] = useState<any[]>([]);
@@ -62,14 +63,14 @@ export default function JournalsIntelligencePage() {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
       {/* Header Banner */}
-      <div className="glass-panel" style={{ padding: '1.75rem', position: 'relative' }}>
+      <div className="glass-panel" style={{ padding: '1.75rem', position: 'relative', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
               <span className="badge badge-cyan">Journal Intelligence DB</span>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Curated External Publications</span>
             </div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Centralized Journal Intelligence & Recommendation
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
@@ -77,8 +78,9 @@ export default function JournalsIntelligencePage() {
             </p>
           </div>
 
-          <button onClick={() => setShowMatcher(true)} className="btn-primary" style={{ background: 'var(--gradient-primary)' }}>
-            🎯 Journal Matching Assistant
+          <button onClick={() => setShowMatcher(true)} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Sparkles size={16} />
+            <span>Journal Matching Assistant</span>
           </button>
         </div>
       </div>
@@ -94,8 +96,8 @@ export default function JournalsIntelligencePage() {
             className="form-input"
             style={{ paddingLeft: '2.3rem' }}
           />
-          <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-            🔍
+          <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+            <Search size={16} />
           </span>
         </div>
 
@@ -103,14 +105,14 @@ export default function JournalsIntelligencePage() {
           value={indexingFilter}
           onChange={(e) => setIndexingFilter(e.target.value)}
           className="form-input"
-          style={{ width: 'auto', minWidth: 190 }}
+          style={{ width: 'auto', minWidth: 160 }}
         >
-          <option value="">All Indexing Standards</option>
-          <option value="SCOPUS">Scopus Indexed</option>
-          <option value="WEB_OF_SCIENCE">Web of Science (WoS)</option>
-          <option value="SCI_SCIE">SCI / SCIE</option>
+          <option value="">All Indexing Tiers</option>
+          <option value="SCI">SCI / SCIE</option>
+          <option value="SCOPUS_Q1">Scopus Q1</option>
+          <option value="SCOPUS_Q2">Scopus Q2</option>
           <option value="PUBMED">PubMed / MEDLINE</option>
-          <option value="UGC_CARE">UGC-CARE Listed</option>
+          <option value="UGC_CARE">UGC-CARE</option>
         </select>
       </div>
 
@@ -119,31 +121,41 @@ export default function JournalsIntelligencePage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Journal Name & Publisher</th>
-              <th>ISSN / eISSN</th>
-              <th>Subject Area</th>
-              <th>Indexing Standards</th>
-              <th>Est. Review & Pub Time</th>
-              <th>APC</th>
-              <th>Actions</th>
+              <th>Journal & Publisher</th>
+              <th>ISSN & Field</th>
+              <th>Impact Factor</th>
+              <th>Indexing</th>
+              <th>Review / Publication</th>
+              <th>APC (Article Fee)</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((j) => (
               <tr key={j.id}>
                 <td>
-                  <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '0.2rem' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
                     {j.name}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    {j.publisher} • {j.country}
+                    {j.publisher} • {j.referenceStyle}
                   </div>
                 </td>
-                <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-cyan)' }}>
-                  {j.issn || j.eissn || 'N/A'}
+                <td>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                    {j.issn || 'N/A'}
+                  </div>
+                  <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>
+                    {j.subjectArea}
+                  </div>
                 </td>
-                <td style={{ fontSize: '0.825rem', color: 'var(--text-secondary)' }}>
-                  {j.subjectArea}
+                <td>
+                  <div style={{ fontWeight: 800, color: 'var(--accent-emerald)', fontSize: '0.95rem' }}>
+                    {j.impactFactor?.toFixed(1) || '3.2'}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    CiteScore: {j.citeScore?.toFixed(1) || '4.1'}
+                  </div>
                 </td>
                 <td>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -183,8 +195,8 @@ export default function JournalsIntelligencePage() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(15, 23, 42, 0.5)',
+            backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -200,14 +212,16 @@ export default function JournalsIntelligencePage() {
               padding: '2rem',
               maxHeight: '90vh',
               overflowY: 'auto',
-              background: '#0d1527',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
+              background: '#ffffff',
+              border: '1px solid var(--border-color)',
+              boxShadow: 'var(--shadow-lg)',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#ffffff' }}>
-                  🎯 Automated Journal Matching & Recommendation
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Sparkles size={18} color="var(--accent-primary)" />
+                  <span>Automated Journal Matching & Recommendation</span>
                 </h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   Evaluates research domain, keywords, target indexing standards, and APC budget to identify optimal publication venues.
@@ -215,9 +229,9 @@ export default function JournalsIntelligencePage() {
               </div>
               <button
                 onClick={() => setShowMatcher(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '1.5rem', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
 
@@ -266,7 +280,7 @@ export default function JournalsIntelligencePage() {
 
             {matchedResults.length > 0 && (
               <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
                   Recommended Journals Ranked by Compatibility
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -276,7 +290,7 @@ export default function JournalsIntelligencePage() {
                       style={{
                         padding: '1rem',
                         borderRadius: 'var(--radius-md)',
-                        background: 'rgba(255, 255, 255, 0.03)',
+                        background: '#f8fafc',
                         border: '1px solid var(--border-color)',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -285,7 +299,7 @@ export default function JournalsIntelligencePage() {
                     >
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                          <span style={{ fontWeight: 700, color: '#ffffff' }}>{item.journal?.name}</span>
+                          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{item.journal?.name}</span>
                           <span className="badge badge-emerald">{item.matchScorePercent}% Match</span>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -297,8 +311,18 @@ export default function JournalsIntelligencePage() {
                         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: item.withinBudget ? 'var(--accent-emerald)' : 'var(--accent-rose)' }}>
                           APC: ${item.journal?.apc || 0} USD
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                          {item.withinBudget ? '✓ Within Budget' : '⚠️ Exceeds Budget'}
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          {item.withinBudget ? (
+                            <>
+                              <Check size={12} color="var(--accent-emerald)" />
+                              <span>Within Budget</span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertTriangle size={12} color="var(--accent-rose)" />
+                              <span>Exceeds Budget</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

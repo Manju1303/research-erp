@@ -1,6 +1,6 @@
-# 🚀 Inzovate ERP — Production Cloud Publishing Guide
+# Scriptara ERP — Production Cloud Publishing Guide
 
-This guide walks you through publishing the **Inzovate Research Publication Management ERP** live to the web using the recommended enterprise stack:
+This guide walks you through publishing the **Scriptara Research Publication Management ERP** live to the web using the recommended enterprise stack:
 - **Frontend**: [Vercel](https://vercel.com) (Next.js 14 edge hosting, global CDN, instant preview deployments)
 - **Backend**: [Render](https://render.com) or [Railway](https://railway.app) (NestJS 10 container / web service)
 - **Database**: Managed PostgreSQL 16 (with connection pooling and automatic SSL)
@@ -11,7 +11,7 @@ This guide walks you through publishing the **Inzovate Research Publication Mana
 
 ```
   [ Vercel CDN ]  <--- Users & Researchers
-  https://inzovate.vercel.app
+  https://research-erp-frontend.vercel.app
          │
          │  (HTTPS REST calls with JWT Bearer Auth)
          ▼

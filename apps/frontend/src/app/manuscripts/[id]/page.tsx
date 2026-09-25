@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../lib/auth-context';
 import { StatusBadge } from '../../../components/StatusBadge';
+import { ShieldCheck, Plus, Check, ArrowLeft } from 'lucide-react';
 
 export default function ManuscriptStudioPage() {
   const { role, displayName } = useAuth();
@@ -48,8 +49,9 @@ To address this limitation, we present a self-attention Transformer framework th
       <div className="glass-panel" style={{ padding: '1.25rem 1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-            <Link href="/projects/proj-1" style={{ fontSize: '0.8rem', color: 'var(--accent-cyan)' }}>
-              ← INZ-2026-001 Workspace
+            <Link href="/projects/proj-1" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              <ArrowLeft size={13} />
+              <span>SCR-2026-001 Workspace</span>
             </Link>
             <span style={{ color: 'var(--text-muted)' }}>|</span>
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Manuscript Studio</span>
@@ -63,11 +65,12 @@ To address this limitation, we present a self-attention Transformer framework th
             style={{
               fontSize: '1.15rem',
               fontWeight: 800,
-              color: '#ffffff',
+              color: 'var(--text-primary)',
               background: 'transparent',
               border: 'none',
               padding: 0,
               width: 650,
+              boxShadow: 'none',
             }}
           />
         </div>
@@ -75,15 +78,15 @@ To address this limitation, we present a self-attention Transformer framework th
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {/* Version Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.05)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafc', border: '1px solid var(--border-color)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Version:</span>
             <select
               value={selectedVersion}
               onChange={(e) => setSelectedVersion(Number(e.target.value))}
-              style={{ background: 'transparent', border: 'none', color: 'var(--accent-cyan)', fontWeight: 700, cursor: 'pointer', outline: 'none' }}
+              style={{ background: 'transparent', border: 'none', color: 'var(--accent-primary)', fontWeight: 700, cursor: 'pointer', outline: 'none' }}
             >
-              <option value={2} style={{ background: '#0d1527' }}>Draft V2 (Latest - QC Pending)</option>
-              <option value={1} style={{ background: '#0d1527' }}>Draft V1 (Archived)</option>
+              <option value={2}>Draft V2 (Latest - QC Pending)</option>
+              <option value={1}>Draft V1 (Archived)</option>
             </select>
           </div>
 
@@ -91,16 +94,23 @@ To address this limitation, we present a self-attention Transformer framework th
             {wordCount} words
           </span>
 
-          <button onClick={handleSaveDraft} className="btn-secondary">
-            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved' : 'Save Draft'}
+          <button onClick={handleSaveDraft} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? (
+              <>
+                <Check size={14} color="var(--accent-emerald)" />
+                <span>Saved</span>
+              </>
+            ) : 'Save Draft'}
           </button>
 
           <button onClick={handleCreateVersion} className="btn-primary">
-            + Tag Version V{selectedVersion + 1}
+            <Plus size={14} />
+            <span>Tag Version V{selectedVersion + 1}</span>
           </button>
 
-          <Link href="/qc" className="btn-primary" style={{ background: 'var(--accent-indigo)' }}>
-            Submit to QC 🛡️
+          <Link href="/qc" className="btn-primary" style={{ background: 'var(--gradient-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <ShieldCheck size={15} />
+            <span>Submit to QC</span>
           </Link>
         </div>
       </div>
@@ -128,10 +138,11 @@ To address this limitation, we present a self-attention Transformer framework th
                 borderRadius: 'var(--radius-md)',
                 fontSize: '0.825rem',
                 fontWeight: activeSection === sec.key ? 700 : 500,
-                color: activeSection === sec.key ? '#ffffff' : 'var(--text-secondary)',
-                background: activeSection === sec.key ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-                border: activeSection === sec.key ? '1px solid rgba(59, 130, 246, 0.4)' : '1px solid transparent',
+                color: activeSection === sec.key ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                background: activeSection === sec.key ? 'var(--accent-primary-light)' : 'transparent',
+                border: activeSection === sec.key ? '1px solid #c7d2fe' : '1px solid transparent',
                 cursor: 'pointer',
+                transition: 'all 0.15s ease',
               }}
             >
               {sec.label}
@@ -145,7 +156,7 @@ To address this limitation, we present a self-attention Transformer framework th
         </div>
 
         {/* Center: Live Manuscript Body Editor */}
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', minHeight: 0, background: '#ffffff' }}>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -167,13 +178,13 @@ To address this limitation, we present a self-attention Transformer framework th
         {/* Right: Version Metadata & QC Status */}
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto' }}>
           <div>
-            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.5rem' }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
               Version Metadata (V{selectedVersion})
             </h4>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
               <div>Author: <strong style={{ color: 'var(--text-primary)' }}>Dr. Sarah Chen</strong></div>
               <div>Last Edit: <strong style={{ color: 'var(--text-primary)' }}>15 mins ago</strong></div>
-              <div>Word Target: <strong style={{ color: 'var(--accent-cyan)' }}>5,000 / 6,000</strong></div>
+              <div>Word Target: <strong style={{ color: 'var(--accent-primary)' }}>5,000 / 6,000</strong></div>
             </div>
           </div>
 
@@ -191,9 +202,9 @@ To address this limitation, we present a self-attention Transformer framework th
           </div>
 
           {/* QC Inspection Summary */}
-          <div style={{ padding: '1rem', borderRadius: 'var(--radius-md)', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+          <div style={{ padding: '1rem', borderRadius: 'var(--radius-md)', background: '#fffbeb', border: '1px solid #fde68a' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-              <span>🛡️</span>
+              <ShieldCheck size={16} color="var(--accent-amber)" />
               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent-amber)' }}>
                 Internal QC Gate
               </span>

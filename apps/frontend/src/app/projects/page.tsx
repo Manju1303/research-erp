@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { api } from '../../lib/api';
 import { StatusBadge } from '../../components/StatusBadge';
 import { useAuth } from '../../lib/auth-context';
+import { Search, Plus, ArrowRight, X, Clock, FolderKanban } from 'lucide-react';
 
 export default function ProjectsPage() {
   const { role } = useAuth();
@@ -78,7 +79,7 @@ export default function ProjectsPage() {
       // Add to local state
       const createdItem = {
         id: `proj-${Date.now()}`,
-        projectCode: `INZ-2026-${String(projects.length + 1).padStart(3, '0')}`,
+        projectCode: `SCR-2026-${String(projects.length + 1).padStart(3, '0')}`,
         title: newTitle,
         domain: newDomain,
         priority: newPriority,
@@ -108,7 +109,7 @@ export default function ProjectsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Research Projects Repository
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
@@ -118,7 +119,8 @@ export default function ProjectsPage() {
 
         {role !== 'client' && (
           <button onClick={() => setShowModal(true)} className="btn-primary">
-            <span>+</span> Initiate Research Project
+            <Plus size={16} />
+            <span>Initiate Research Project</span>
           </button>
         )}
       </div>
@@ -134,8 +136,8 @@ export default function ProjectsPage() {
             className="form-input"
             style={{ paddingLeft: '2.3rem' }}
           />
-          <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-            🔍
+          <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+            <Search size={16} />
           </span>
         </div>
 
@@ -184,20 +186,35 @@ export default function ProjectsPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.length === 0 ? (
+            {loading ? (
               <tr>
                 <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                  No research projects found matching your criteria.
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <Clock size={16} className="animate-spin" />
+                    <span>Loading projects...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : filteredProjects.length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                      <FolderKanban size={20} />
+                    </div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>No research projects found</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Try adjusting your search query or lifecycle filters.</div>
+                  </div>
                 </td>
               </tr>
             ) : (
               filteredProjects.map((p) => (
                 <tr key={p.id}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-cyan)' }}>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>
                     {p.projectCode}
                   </td>
                   <td>
-                    <Link href={`/projects/${p.id}`} style={{ fontWeight: 600, color: '#ffffff', display: 'block', marginBottom: '0.2rem' }}>
+                    <Link href={`/projects/${p.id}`} style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: '0.2rem' }}>
                       {p.title}
                     </Link>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -220,7 +237,7 @@ export default function ProjectsPage() {
                       style={{
                         fontSize: '0.75rem',
                         fontWeight: 700,
-                        color: p.priority === 'URGENT' ? '#fb7185' : p.priority === 'HIGH' ? '#fbbf24' : '#60a5fa',
+                        color: p.priority === 'URGENT' ? 'var(--accent-rose)' : p.priority === 'HIGH' ? 'var(--accent-amber)' : 'var(--accent-blue)',
                       }}
                     >
                       {p.priority}
@@ -233,9 +250,10 @@ export default function ProjectsPage() {
                     <Link
                       href={`/projects/${p.id}`}
                       className="btn-secondary"
-                      style={{ padding: '0.4rem 0.85rem', fontSize: '0.75rem' }}
+                      style={{ padding: '0.4rem 0.85rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
                     >
-                      Workspace →
+                      <span>Workspace</span>
+                      <ArrowRight size={13} />
                     </Link>
                   </td>
                 </tr>
@@ -254,8 +272,8 @@ export default function ProjectsPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(15, 23, 42, 0.5)',
+            backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -271,13 +289,14 @@ export default function ProjectsPage() {
               padding: '2rem',
               maxHeight: '90vh',
               overflowY: 'auto',
-              background: '#0d1527',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
+              background: '#ffffff',
+              border: '1px solid var(--border-color)',
+              boxShadow: 'var(--shadow-lg)',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                   Initiate Research Project
                 </h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -286,9 +305,9 @@ export default function ProjectsPage() {
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '1.5rem', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
 

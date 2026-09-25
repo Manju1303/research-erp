@@ -7,6 +7,7 @@ import { api } from '../../../lib/api';
 import { useAuth } from '../../../lib/auth-context';
 import { StatusBadge } from '../../../components/StatusBadge';
 import { TimelineView } from '../../../components/TimelineView';
+import { ShieldCheck, PenTool, UploadCloud, FileText, Download, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function ProjectWorkspacePage() {
   const params = useParams();
@@ -51,7 +52,7 @@ export default function ProjectWorkspacePage() {
                 phone: '+1 650 723 2300',
               },
             },
-            manager: { firstName: 'Elena', lastName: 'Rostova', email: 'elena.r@inzovate.com' },
+            manager: { firstName: 'Elena', lastName: 'Rostova', email: 'elena.r@scriptara.com' },
             manuscripts: [
               {
                 id: 'manu-1',
@@ -159,19 +160,19 @@ export default function ProjectWorkspacePage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.95rem', color: 'var(--accent-cyan)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.95rem', color: 'var(--accent-primary)' }}>
                 {project.projectCode}
               </span>
               <StatusBadge status={project.status} />
               <span className="badge badge-purple">{project.priority} PRIORITY</span>
             </div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em', maxWidth: 800 }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', maxWidth: 800 }}>
               {project.title}
             </h1>
             <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem', fontSize: '0.825rem', color: 'var(--text-secondary)' }}>
-              <span>Domain: <strong style={{ color: '#ffffff' }}>{project.domain}</strong></span>
-              <span>Target: <strong style={{ color: 'var(--accent-cyan)' }}>{project.targetJournalType}</strong></span>
-              <span>Budget: <strong style={{ color: '#34d399' }}>${project.budget} {project.currency}</strong></span>
+              <span>Domain: <strong style={{ color: 'var(--text-primary)' }}>{project.domain}</strong></span>
+              <span>Target: <strong style={{ color: 'var(--accent-primary)' }}>{project.targetJournalType}</strong></span>
+              <span>Budget: <strong style={{ color: 'var(--accent-emerald)' }}>${project.budget} {project.currency}</strong></span>
             </div>
           </div>
 
@@ -186,13 +187,15 @@ export default function ProjectWorkspacePage() {
                 disabled={isTransitioning}
                 className="btn-primary"
               >
-                🛡️ Submit to Internal QC
+                <ShieldCheck size={16} />
+                <span>Submit to Internal QC</span>
               </button>
             )}
             {project.status === 'INTERNAL_QC' && (
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Link href="/qc" className="btn-primary" style={{ flex: 1 }}>
-                  Open QC Checklist →
+                <Link href="/qc" className="btn-primary" style={{ flex: 1, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <span>Open QC Checklist</span>
+                  <ArrowRight size={14} />
                 </Link>
                 <button
                   onClick={() => handleStatusTransition('CLIENT_REVIEW')}
@@ -212,7 +215,8 @@ export default function ProjectWorkspacePage() {
                   className="btn-primary"
                   style={{ background: 'var(--accent-emerald)' }}
                 >
-                  ✓ Author Approval
+                  <CheckCircle2 size={16} />
+                  <span>Author Approval</span>
                 </button>
                 <button
                   onClick={() => handleStatusTransition('DRAFTING')}
@@ -229,7 +233,8 @@ export default function ProjectWorkspacePage() {
                 disabled={isTransitioning}
                 className="btn-primary"
               >
-                Match Journals for Submission →
+                <span>Match Journals for Submission</span>
+                <ArrowRight size={14} />
               </button>
             )}
           </div>
@@ -257,10 +262,10 @@ export default function ProjectWorkspacePage() {
               border: 'none',
               fontSize: '0.85rem',
               fontWeight: activeTab === tab.key ? 700 : 500,
-              color: activeTab === tab.key ? '#ffffff' : 'var(--text-muted)',
-              background: activeTab === tab.key ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+              color: activeTab === tab.key ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              background: activeTab === tab.key ? 'var(--accent-primary-light)' : 'transparent',
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
+              transition: 'all 0.15s ease',
             }}
           >
             {tab.label}
@@ -351,15 +356,16 @@ export default function ProjectWorkspacePage() {
         <div className="glass-panel" style={{ padding: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Manuscript Versions & Revisions
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 Immutable historical versions. Previous drafts are permanently preserved.
               </p>
             </div>
-            <Link href={`/manuscripts/${project.id}`} className="btn-primary">
-              Open Manuscript Studio ✏️
+            <Link href={`/manuscripts/${project.id}`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span>Open Manuscript Studio</span>
+              <PenTool size={14} />
             </Link>
           </div>
 
@@ -379,7 +385,7 @@ export default function ProjectWorkspacePage() {
               <tbody>
                 {project.manuscripts?.[0]?.versions?.map((v: any) => (
                   <tr key={v.id}>
-                    <td style={{ fontWeight: 700, color: 'var(--accent-cyan)' }}>
+                    <td style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>
                       Draft V{v.versionNumber}
                     </td>
                     <td>
@@ -411,15 +417,16 @@ export default function ProjectWorkspacePage() {
         <div className="glass-panel" style={{ padding: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Allocated Project Tasks
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 Modular task breakdown from requirements analysis to journal formatting
               </p>
             </div>
-            <Link href="/tasks" className="btn-secondary">
-              Open Kanban Board →
+            <Link href="/tasks" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <span>Open Kanban Board</span>
+              <ArrowRight size={13} />
             </Link>
           </div>
 
@@ -437,12 +444,12 @@ export default function ProjectWorkspacePage() {
               <tbody>
                 {project.tasks?.map((t: any) => (
                   <tr key={t.id}>
-                    <td style={{ fontWeight: 600, color: '#ffffff' }}>{t.title}</td>
+                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t.title}</td>
                     <td>{t.assignee?.firstName} {t.assignee?.lastName}</td>
                     <td><StatusBadge status={t.status} /></td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ width: 70, height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ width: 70, height: 6, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
                           <div style={{ width: `${t.completionPct}%`, height: '100%', background: 'var(--accent-emerald)', borderRadius: 3 }} />
                         </div>
                         <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{t.completionPct}%</span>
@@ -462,15 +469,16 @@ export default function ProjectWorkspacePage() {
         <div className="glass-panel" style={{ padding: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Secure Document Repository
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 Research materials, datasets, manuscript drafts, QC reports, and journal correspondence
               </p>
             </div>
-            <button className="btn-primary">
-              Upload Document ⬆
+            <button className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <UploadCloud size={14} />
+              <span>Upload Document</span>
             </button>
           </div>
 
@@ -489,7 +497,10 @@ export default function ProjectWorkspacePage() {
               <tbody>
                 {project.documents?.map((d: any) => (
                   <tr key={d.id}>
-                    <td style={{ fontWeight: 600, color: '#ffffff' }}>📄 {d.filename}</td>
+                    <td style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <FileText size={15} color="var(--accent-primary)" />
+                      <span>{d.filename}</span>
+                    </td>
                     <td><span className="badge badge-blue">{d.category}</span></td>
                     <td>
                       <span className={`badge ${d.accessLevel === 'CLIENT' ? 'badge-emerald' : 'badge-amber'}`}>
@@ -503,8 +514,9 @@ export default function ProjectWorkspacePage() {
                       {new Date(d.createdAt).toLocaleDateString()}
                     </td>
                     <td>
-                      <button className="btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
-                        Download ↓
+                      <button className="btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Download size={13} />
+                        <span>Download</span>
                       </button>
                     </td>
                   </tr>

@@ -70,8 +70,8 @@ async function bootstrap() {
   const enableSwagger = config.get('ENABLE_SWAGGER', 'true') === 'true';
   if (config.get('NODE_ENV') !== 'production' || enableSwagger) {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('Inzovate ERP API')
-      .setDescription('Research Publication Management ERP — Enterprise API')
+      .setTitle('Scriptara ERP API')
+      .setDescription('Scriptara Research Publication Management ERP — Enterprise API')
       .setVersion('1.0')
       .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
       .build();

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { StatCard } from '../../components/StatCard';
+import { BarChart3, Download, BookOpen, Award, Send, TrendingUp } from 'lucide-react';
 
 export default function ReportsAnalyticsPage() {
   const [operational, setOperational] = useState<any>(null);
@@ -46,7 +47,7 @@ export default function ReportsAnalyticsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `inzovate_${type}_report.csv`;
+    a.download = `scriptara_${type}_report.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -56,11 +57,11 @@ export default function ReportsAnalyticsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
             <span className="badge badge-purple">Executive Business Intelligence</span>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Operational Scorecards & Turnaround Times</span>
           </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Organizational Performance & Management Reports
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
@@ -70,11 +71,13 @@ export default function ReportsAnalyticsPage() {
 
         {/* Export Buttons */}
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={() => handleExport('employees')} className="btn-secondary">
-            Export Staff Metrics (CSV) 📊
+          <button onClick={() => handleExport('employees')} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <BarChart3 size={15} />
+            <span>Export Staff Metrics (CSV)</span>
           </button>
-          <button onClick={() => handleExport('operations')} className="btn-primary">
-            Export Operational Summary (CSV) 📥
+          <button onClick={() => handleExport('operations')} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Download size={15} />
+            <span>Export Operational Summary (CSV)</span>
           </button>
         </div>
       </div>
@@ -86,28 +89,28 @@ export default function ReportsAnalyticsPage() {
           value={operational?.totalProjects || 28}
           change="All-time portfolio"
           color="blue"
-          icon="📚"
+          icon={<BookOpen size={18} />}
         />
         <StatCard
           title="Accepted Publications"
           value={operational?.acceptedPublications || 18}
           change={operational?.publicationSuccessRate || '82% Success'}
           color="emerald"
-          icon="🏆"
+          icon={<Award size={18} />}
         />
         <StatCard
           title="Active Submissions"
           value={operational?.totalSubmissions || 22}
           change="In Editorial Review"
           color="cyan"
-          icon="📬"
+          icon={<Send size={18} />}
         />
         <StatCard
           title="Cumulative Revenue"
           value={`$${(operational?.collectedRevenue || 148500).toLocaleString()}`}
           change="Financial Volume"
           color="purple"
-          icon="📈"
+          icon={<TrendingUp size={18} />}
         />
       </div>
 
@@ -115,7 +118,7 @@ export default function ReportsAnalyticsPage() {
       <div className="glass-panel" style={{ padding: '1.75rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               Employee Performance & Workload Scorecards
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -142,23 +145,23 @@ export default function ReportsAnalyticsPage() {
               {employees.map((emp) => (
                 <tr key={emp.id}>
                   <td>
-                    <div style={{ fontWeight: 700, color: '#ffffff' }}>{emp.name}</div>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{emp.name}</div>
                     <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>{emp.email}</div>
                   </td>
                   <td>
                     <span className="badge badge-blue">{emp.role}</span>
                   </td>
-                  <td style={{ fontWeight: 600, color: '#ffffff' }}>{emp.totalTasks} tasks</td>
+                  <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{emp.totalTasks} tasks</td>
                   <td style={{ color: 'var(--accent-emerald)', fontWeight: 600 }}>{emp.completedTasks} tasks</td>
                   <td style={{ color: emp.pendingTasks > 0 ? 'var(--accent-amber)' : 'var(--text-muted)' }}>
                     {emp.pendingTasks} pending
                   </td>
-                  <td style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>
+                  <td style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>
                     {emp.manuscriptVersionsAuthored} versions
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <div style={{ width: 80, height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ width: 80, height: 6, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
                         <div
                           style={{
                             width: `${emp.onTimeCompletionRate}%`,

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { StatusBadge } from '../../components/StatusBadge';
+import { User, Calendar, Check, CheckSquare } from 'lucide-react';
 
 interface TaskItem {
   id: string;
@@ -16,12 +17,12 @@ interface TaskItem {
 
 export default function TasksKanbanPage() {
   const [tasks, setTasks] = useState<TaskItem[]>([
-    { id: '1', projectCode: 'INZ-2026-001', title: 'Synthesize related literature on transformer variant callers', status: 'COMPLETED', priority: 'NORMAL', completionPct: 100, assignee: 'Dr. Sarah Chen', dueDate: '2026-10-15' },
-    { id: '2', projectCode: 'INZ-2026-001', title: 'Benchmark model against GATK and DeepVariant on ClinVar', status: 'COMPLETED', priority: 'HIGH', completionPct: 100, assignee: 'Dr. Sarah Chen', dueDate: '2026-10-25' },
-    { id: '3', projectCode: 'INZ-2026-001', title: 'Execute technical QC checklist & plagiarism screening', status: 'UNDER_REVIEW', priority: 'URGENT', completionPct: 90, assignee: 'Marcus Vance', dueDate: '2026-11-02' },
-    { id: '4', projectCode: 'INZ-2026-002', title: 'Perform thermal stability degradation simulations for perovskite layer', status: 'IN_PROGRESS', priority: 'HIGH', completionPct: 65, assignee: 'Alex Vance', dueDate: '2026-11-10' },
-    { id: '5', projectCode: 'INZ-2026-003', title: 'Design smart contract state transitions for patient consent module', status: 'IN_PROGRESS', priority: 'NORMAL', completionPct: 40, assignee: 'Dr. Sarah Chen', dueDate: '2026-11-18' },
-    { id: '6', projectCode: 'INZ-2026-003', title: 'Perform formal verification of access-control logic', status: 'TODO', priority: 'NORMAL', completionPct: 0, assignee: 'David Mercer', dueDate: '2026-11-28' },
+    { id: '1', projectCode: 'SCR-2026-001', title: 'Synthesize related literature on transformer variant callers', status: 'COMPLETED', priority: 'NORMAL', completionPct: 100, assignee: 'Dr. Sarah Chen', dueDate: '2026-10-15' },
+    { id: '2', projectCode: 'SCR-2026-001', title: 'Benchmark model against GATK and DeepVariant on ClinVar', status: 'COMPLETED', priority: 'HIGH', completionPct: 100, assignee: 'Dr. Sarah Chen', dueDate: '2026-10-25' },
+    { id: '3', projectCode: 'SCR-2026-001', title: 'Execute technical QC checklist & plagiarism screening', status: 'UNDER_REVIEW', priority: 'URGENT', completionPct: 90, assignee: 'Marcus Vance', dueDate: '2026-11-02' },
+    { id: '4', projectCode: 'SCR-2026-002', title: 'Perform thermal stability degradation simulations for perovskite layer', status: 'IN_PROGRESS', priority: 'HIGH', completionPct: 65, assignee: 'Alex Vance', dueDate: '2026-11-10' },
+    { id: '5', projectCode: 'SCR-2026-003', title: 'Design smart contract state transitions for patient consent module', status: 'IN_PROGRESS', priority: 'NORMAL', completionPct: 40, assignee: 'Dr. Sarah Chen', dueDate: '2026-11-18' },
+    { id: '6', projectCode: 'SCR-2026-003', title: 'Perform formal verification of access-control logic', status: 'TODO', priority: 'NORMAL', completionPct: 0, assignee: 'David Mercer', dueDate: '2026-11-28' },
   ]);
 
   const [activeFilter, setActiveFilter] = useState('');
@@ -55,7 +56,7 @@ export default function TasksKanbanPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Operational Task & Workflow Board
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
@@ -74,8 +75,9 @@ export default function TasksKanbanPage() {
               style={{
                 padding: '0.35rem 0.75rem',
                 fontSize: '0.75rem',
-                background: activeFilter === p ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.04)',
-                border: activeFilter === p ? '1px solid var(--accent-blue)' : '1px solid var(--border-color)',
+                background: activeFilter === p ? 'var(--accent-primary-light)' : '#ffffff',
+                border: activeFilter === p ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                color: activeFilter === p ? 'var(--accent-primary)' : 'var(--text-secondary)',
               }}
             >
               {p || 'All'}
@@ -98,7 +100,8 @@ export default function TasksKanbanPage() {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '1rem',
-                background: 'rgba(13, 21, 39, 0.6)',
+                background: '#f8fafc',
+                border: '1px solid var(--border-color)',
                 minHeight: '600px',
               }}
             >
@@ -106,7 +109,7 @@ export default function TasksKanbanPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: col.color }} />
-                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                     {col.label}
                   </span>
                 </div>
@@ -114,10 +117,11 @@ export default function TasksKanbanPage() {
                   style={{
                     fontSize: '0.75rem',
                     fontWeight: 700,
-                    background: 'rgba(255,255,255,0.08)',
+                    background: '#ffffff',
+                    border: '1px solid var(--border-color)',
                     padding: '0.15rem 0.5rem',
                     borderRadius: 'var(--radius-full)',
-                    color: 'var(--text-secondary)',
+                    color: 'var(--text-muted)',
                   }}
                 >
                   {colTasks.length}
@@ -132,17 +136,17 @@ export default function TasksKanbanPage() {
                     style={{
                       padding: '1.1rem',
                       borderRadius: 'var(--radius-md)',
-                      background: 'rgba(16, 26, 48, 0.85)',
+                      background: '#ffffff',
                       border: '1px solid var(--border-color)',
                       boxShadow: 'var(--shadow-sm)',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: '0.65rem',
-                      transition: 'all 0.2s ease',
+                      transition: 'all 0.15s ease',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.725rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
                         {task.projectCode}
                       </span>
                       <span
@@ -153,23 +157,29 @@ export default function TasksKanbanPage() {
                           borderRadius: 'var(--radius-full)',
                           background:
                             task.priority === 'URGENT'
-                              ? 'rgba(244, 63, 94, 0.15)'
+                              ? '#fff1f2'
                               : task.priority === 'HIGH'
-                              ? 'rgba(245, 158, 11, 0.15)'
-                              : 'rgba(59, 130, 246, 0.15)',
+                              ? '#fffbeb'
+                              : '#eff6ff',
                           color:
                             task.priority === 'URGENT'
-                              ? '#fb7185'
+                              ? 'var(--accent-rose)'
                               : task.priority === 'HIGH'
-                              ? '#fbbf24'
-                              : '#60a5fa',
+                              ? 'var(--accent-amber)'
+                              : 'var(--accent-blue)',
+                          border:
+                            task.priority === 'URGENT'
+                              ? '1px solid #fecdd3'
+                              : task.priority === 'HIGH'
+                              ? '1px solid #fde68a'
+                              : '1px solid #bfdbfe',
                         }}
                       >
                         {task.priority}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>
                       {task.title}
                     </div>
 
@@ -179,15 +189,21 @@ export default function TasksKanbanPage() {
                         <span>Progress</span>
                         <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{task.completionPct}%</span>
                       </div>
-                      <div style={{ width: '100%', height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-                        <div style={{ width: `${task.completionPct}%`, height: '100%', background: 'var(--accent-cyan)', borderRadius: 2 }} />
+                      <div style={{ width: '100%', height: 5, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ width: `${task.completionPct}%`, height: '100%', background: 'var(--accent-primary)', borderRadius: 3 }} />
                       </div>
                     </div>
 
                     {/* Footer Info & Quick Move */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.04)', fontSize: '0.725rem', color: 'var(--text-muted)' }}>
-                      <span>👤 {task.assignee}</span>
-                      <span>📅 {task.dueDate}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.4rem', borderTop: '1px solid #f1f5f9', fontSize: '0.725rem', color: 'var(--text-muted)' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <User size={12} />
+                        <span>{task.assignee}</span>
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <Calendar size={12} />
+                        <span>{task.dueDate}</span>
+                      </span>
                     </div>
 
                     {/* Move Actions */}
@@ -195,7 +211,7 @@ export default function TasksKanbanPage() {
                       {col.key !== 'TODO' && (
                         <button
                           onClick={() => moveTask(task.id, 'TODO')}
-                          style={{ flex: 1, padding: '0.25rem', fontSize: '0.65rem', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: 4, color: 'var(--text-muted)', cursor: 'pointer' }}
+                          style={{ flex: 1, padding: '0.3rem', fontSize: '0.7rem', background: '#f8fafc', border: '1px solid var(--border-color)', borderRadius: 4, color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 500 }}
                         >
                           ← To Do
                         </button>
@@ -203,7 +219,7 @@ export default function TasksKanbanPage() {
                       {col.key !== 'IN_PROGRESS' && (
                         <button
                           onClick={() => moveTask(task.id, 'IN_PROGRESS')}
-                          style={{ flex: 1, padding: '0.25rem', fontSize: '0.65rem', background: 'rgba(59,130,246,0.15)', border: 'none', borderRadius: 4, color: '#60a5fa', cursor: 'pointer' }}
+                          style={{ flex: 1, padding: '0.3rem', fontSize: '0.7rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 4, color: '#1d4ed8', cursor: 'pointer', fontWeight: 600 }}
                         >
                           In Progress
                         </button>
@@ -211,9 +227,10 @@ export default function TasksKanbanPage() {
                       {col.key !== 'COMPLETED' && (
                         <button
                           onClick={() => moveTask(task.id, 'COMPLETED')}
-                          style={{ flex: 1, padding: '0.25rem', fontSize: '0.65rem', background: 'rgba(16,185,129,0.15)', border: 'none', borderRadius: 4, color: '#34d399', cursor: 'pointer' }}
+                          style={{ flex: 1, padding: '0.3rem', fontSize: '0.7rem', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 4, color: '#047857', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}
                         >
-                          Done ✓
+                          <Check size={11} />
+                          <span>Done</span>
                         </button>
                       )}
                     </div>

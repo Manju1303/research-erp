@@ -18,12 +18,12 @@ export const TimelineView: React.FC<{ currentStatus: string }> = ({ currentStatu
   const activeIndex = currentIndex === -1 ? 4 : currentIndex;
 
   return (
-    <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+    <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', background: '#ffffff' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <h4 style={{ fontSize: '0.925rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.02em' }}>
-          PROJECT PUBLICATION LIFECYCLE
+        <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          Project Publication Lifecycle
         </h4>
-        <span style={{ fontSize: '0.8rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>
+        <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
           Stage {activeIndex + 1} of {STAGES.length}
         </span>
       </div>
@@ -59,11 +59,11 @@ export const TimelineView: React.FC<{ currentStatus: string }> = ({ currentStatu
                       ? 'var(--accent-emerald)'
                       : isCurrent
                       ? 'var(--gradient-primary)'
-                      : 'rgba(255, 255, 255, 0.05)',
+                      : '#f1f5f9',
                     color: isDone || isCurrent ? '#ffffff' : 'var(--text-muted)',
-                    border: isCurrent ? '2px solid rgba(255,255,255,0.6)' : '1px solid var(--border-color)',
-                    boxShadow: isCurrent ? '0 0 15px rgba(6, 182, 212, 0.6)' : 'none',
-                    transition: 'all 0.3s ease',
+                    border: isCurrent ? '2px solid #ffffff' : isDone ? 'none' : '1px solid var(--border-color)',
+                    boxShadow: isCurrent ? '0 0 10px rgba(79, 70, 229, 0.4)' : 'none',
+                    transition: 'all 0.2s ease',
                   }}
                 >
                   {isDone ? '✓' : idx + 1}
@@ -72,8 +72,8 @@ export const TimelineView: React.FC<{ currentStatus: string }> = ({ currentStatu
                   style={{
                     marginTop: '0.5rem',
                     fontSize: '0.725rem',
-                    fontWeight: isCurrent ? 700 : 500,
-                    color: isCurrent ? 'var(--accent-cyan)' : isDone ? 'var(--text-primary)' : 'var(--text-muted)',
+                    fontWeight: isCurrent ? 700 : isDone ? 600 : 500,
+                    color: isCurrent ? 'var(--accent-primary)' : isDone ? 'var(--text-primary)' : 'var(--text-muted)',
                     textAlign: 'center',
                     whiteSpace: 'nowrap',
                   }}
@@ -87,7 +87,7 @@ export const TimelineView: React.FC<{ currentStatus: string }> = ({ currentStatu
                   style={{
                     flex: 1,
                     height: 2,
-                    background: idx < activeIndex ? 'var(--accent-emerald)' : 'rgba(255, 255, 255, 0.08)',
+                    background: idx < activeIndex ? 'var(--accent-emerald)' : '#e2e8f0',
                     minWidth: 20,
                     marginTop: -22,
                     zIndex: 1,

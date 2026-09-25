@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import { Award, Download, Plus, ExternalLink } from 'lucide-react';
 
 export default function PublicationsTrackerPage() {
   const [publications, setPublications] = useState<any[]>([]);
@@ -33,11 +34,11 @@ export default function PublicationsTrackerPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
             <span className="badge badge-emerald">Final Deliverables</span>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Scholarly Publications & DOIs</span>
           </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Published Manuscripts & DOI Repository
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
@@ -45,8 +46,9 @@ export default function PublicationsTrackerPage() {
           </p>
         </div>
 
-        <button className="btn-primary" style={{ background: 'var(--accent-emerald)' }}>
-          + Register Published Article
+        <button className="btn-primary" style={{ background: 'var(--accent-emerald)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Plus size={16} />
+          <span>Register Published Article</span>
         </button>
       </div>
 
@@ -68,10 +70,10 @@ export default function PublicationsTrackerPage() {
             {filtered.map((pub) => (
               <tr key={pub.id}>
                 <td>
-                  <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '0.2rem' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
                     {pub.title}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
                     {pub.submission?.journal?.name}
                   </div>
                 </td>
@@ -80,9 +82,10 @@ export default function PublicationsTrackerPage() {
                     href={pub.articleUrl}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ fontFamily: 'var(--font-mono)', fontSize: '0.775rem', color: 'var(--accent-emerald)', textDecoration: 'underline' }}
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: '0.775rem', color: 'var(--accent-emerald)', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                   >
-                    doi:{pub.doi}
+                    <span>doi:{pub.doi}</span>
+                    <ExternalLink size={12} />
                   </a>
                 </td>
                 <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -96,13 +99,15 @@ export default function PublicationsTrackerPage() {
                   {pub.project?.client?.organization}
                 </td>
                 <td>
-                  <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem' }}>
-                    PDF ↓
+                  <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Download size={12} />
+                    <span>PDF</span>
                   </button>
                 </td>
                 <td>
-                  <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem', borderColor: 'var(--accent-emerald)', color: 'var(--accent-emerald)' }}>
-                    Cert 🏅
+                  <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem', borderColor: '#a7f3d0', color: 'var(--accent-emerald)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: '#ecfdf5' }}>
+                    <Award size={12} />
+                    <span>Certificate</span>
                   </button>
                 </td>
               </tr>

@@ -20,6 +20,7 @@ import { PublicationsModule } from './modules/publications/publications.module';
 import { FinanceModule } from './modules/finance/finance.module';
 import { CommunicationsModule } from './modules/communications/communications.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { HealthModule } from './modules/health/health.module';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { appConfig } from './config/app.config';
 import { jwtConfig } from './config/jwt.config';
@@ -63,6 +64,7 @@ import { redisConfig } from './config/redis.config';
     FinanceModule,
     CommunicationsModule,
     ReportsModule,
+    HealthModule,
   ],
   providers: [
     // Apply rate limiting globally

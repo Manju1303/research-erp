@@ -1,5 +1,5 @@
 /**
- * Inzovate Enterprise API Client
+ * Scriptara Enterprise API Client
  * Automatically connects to backend /api/v1 endpoints with JWT bearer authentication,
  * and seamlessly provides rich mock data fallback for immediate offline demonstration.
  */
@@ -23,15 +23,19 @@ class ApiClient {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('inzovate_token');
+      this.token = localStorage.getItem('scriptara_token') || localStorage.getItem('inzovate_token');
     }
   }
 
   setToken(token: string | null) {
     this.token = token;
     if (typeof window !== 'undefined') {
-      if (token) localStorage.setItem('inzovate_token', token);
-      else localStorage.removeItem('inzovate_token');
+      if (token) {
+        localStorage.setItem('scriptara_token', token);
+      } else {
+        localStorage.removeItem('scriptara_token');
+        localStorage.removeItem('inzovate_token');
+      }
     }
   }
 
@@ -293,7 +297,7 @@ class ApiClient {
         data: [
           {
             id: 'log-1',
-            userEmail: 'marcus.vance@inzovate.com',
+            userEmail: 'marcus.vance@scriptara.com',
             userRole: 'quality_analyst',
             action: 'manuscripts.qc_verification_updated',
             entity: 'ManuscriptVersion',
@@ -304,7 +308,7 @@ class ApiClient {
           },
           {
             id: 'log-2',
-            userEmail: 'sarah.chen@inzovate.com',
+            userEmail: 'sarah.chen@scriptara.com',
             userRole: 'research_staff',
             action: 'manuscripts.new_version_created',
             entity: 'ManuscriptVersion',
@@ -315,14 +319,14 @@ class ApiClient {
           },
           {
             id: 'log-3',
-            userEmail: 'elena.rostova@inzovate.com',
+            userEmail: 'elena.rostova@scriptara.com',
             userRole: 'research_manager',
             action: 'projects.staff_assigned',
             entity: 'ProjectStaff',
             entityId: 'proj-1',
             createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
             ipAddress: '192.168.1.101',
-            metadata: { assignedUser: 'sarah.chen@inzovate.com', role: 'research_staff' },
+            metadata: { assignedUser: 'sarah.chen@scriptara.com', role: 'research_staff' },
           },
         ],
         meta: { total: 3, page: 1, limit: 20, totalPages: 1 },
@@ -622,7 +626,7 @@ class ApiClient {
           {
             id: 'u-1',
             name: 'Dr. Sarah Chen',
-            email: 'sarah.c@inzovate.com',
+            email: 'sarah.c@scriptara.com',
             role: 'Research Staff',
             totalTasks: 18,
             completedTasks: 16,
@@ -633,7 +637,7 @@ class ApiClient {
           {
             id: 'u-2',
             name: 'Marcus Vance',
-            email: 'marcus.v@inzovate.com',
+            email: 'marcus.v@scriptara.com',
             role: 'Quality Analyst (QC)',
             totalTasks: 24,
             completedTasks: 22,
@@ -644,7 +648,7 @@ class ApiClient {
           {
             id: 'u-3',
             name: 'Elena Rostova',
-            email: 'elena.r@inzovate.com',
+            email: 'elena.r@scriptara.com',
             role: 'Research Manager',
             totalTasks: 12,
             completedTasks: 11,

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import { Search, UserPlus, ArrowRight, Building2, Mail, Globe, Award } from 'lucide-react';
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -39,7 +40,7 @@ export default function ClientsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Institutional Researchers & Authors Directory
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
@@ -47,8 +48,9 @@ export default function ClientsPage() {
           </p>
         </div>
 
-        <button className="btn-primary">
-          + Register Researcher Profile
+        <button className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <UserPlus size={15} />
+          <span>Register Researcher Profile</span>
         </button>
       </div>
 
@@ -63,8 +65,8 @@ export default function ClientsPage() {
             className="form-input"
             style={{ paddingLeft: '2.4rem' }}
           />
-          <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-            🔍
+          <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+            <Search size={16} />
           </span>
         </div>
       </div>
@@ -82,6 +84,7 @@ export default function ClientsPage() {
               gap: '1rem',
               position: 'relative',
               overflow: 'hidden',
+              background: '#ffffff',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -97,15 +100,16 @@ export default function ClientsPage() {
                   fontWeight: 800,
                   fontSize: '1.1rem',
                   color: '#ffffff',
+                  boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)',
                 }}
               >
                 {c.user?.firstName?.[0] || 'R'}
               </div>
               <div>
-                <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>
+                <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   {c.user?.firstName} {c.user?.lastName}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
                   {c.designation || 'Principal Researcher'}
                 </div>
               </div>
@@ -132,7 +136,7 @@ export default function ClientsPage() {
               </div>
               <div>
                 <span style={{ color: 'var(--text-muted)' }}>Email: </span>
-                <span style={{ color: 'var(--accent-blue)' }}>{c.user?.email}</span>
+                <span style={{ color: 'var(--accent-primary)' }}>{c.user?.email}</span>
               </div>
             </div>
 
@@ -140,8 +144,9 @@ export default function ClientsPage() {
               <span className="badge badge-purple">
                 {c._count?.projects || 1} Research Papers
               </span>
-              <button className="btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
-                View Portfolio →
+              <button className="btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                <span>View Portfolio</span>
+                <ArrowRight size={13} />
               </button>
             </div>
           </div>

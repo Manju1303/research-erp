@@ -5,8 +5,8 @@ import { Sidebar } from '../components/Sidebar';
 import { Navbar } from '../components/Navbar';
 
 export const metadata: Metadata = {
-  title: 'Inzovate ERP — Research Publication Management Suite',
-  description: 'Enterprise-grade end-to-end research paper development and journal publication management platform.',
+  title: 'Scriptara — Research Publication Management Platform',
+  description: 'Enterprise-grade end-to-end research paper development, manuscript formulation, and journal publication management ERP.',
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+          <div style={{ display: 'flex', minHeight: '100vh', width: '100%', backgroundColor: 'var(--bg-primary)' }}>
             <Sidebar />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <Navbar />

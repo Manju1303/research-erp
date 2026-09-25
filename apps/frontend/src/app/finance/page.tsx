@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { StatCard } from '../../components/StatCard';
+import { DollarSign, Clock, Receipt, Download, Plus } from 'lucide-react';
 
 export default function FinanceBillingPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -33,11 +34,11 @@ export default function FinanceBillingPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
             <span className="badge badge-emerald">Accounting & Receivables</span>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Project Billing & Journal APC</span>
           </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Finance & Project Billing Management
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
@@ -45,8 +46,9 @@ export default function FinanceBillingPage() {
           </p>
         </div>
 
-        <button className="btn-primary">
-          + Generate New Invoice
+        <button className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Plus size={16} />
+          <span>Generate New Invoice</span>
         </button>
       </div>
 
@@ -57,7 +59,7 @@ export default function FinanceBillingPage() {
           value={`$${(overview?.totalCollectedRevenue || 148500).toLocaleString()} USD`}
           change="14.8%"
           color="emerald"
-          icon="💰"
+          icon={<DollarSign size={18} />}
         />
         <StatCard
           title="Outstanding Receivables"
@@ -65,14 +67,14 @@ export default function FinanceBillingPage() {
           change="3 Overdue"
           isPositive={false}
           color="amber"
-          icon="⏳"
+          icon={<Clock size={18} />}
         />
         <StatCard
           title="Settled Invoices"
           value={overview?.paidInvoicesCount || 42}
           change="100% Reconciled"
           color="blue"
-          icon="🧾"
+          icon={<Receipt size={18} />}
         />
       </div>
 
@@ -82,9 +84,9 @@ export default function FinanceBillingPage() {
           onClick={() => setActiveTab('invoices')}
           className="btn-secondary"
           style={{
-            background: activeTab === 'invoices' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-            border: activeTab === 'invoices' ? '1px solid var(--accent-blue)' : 'none',
-            color: activeTab === 'invoices' ? '#ffffff' : 'var(--text-muted)',
+            background: activeTab === 'invoices' ? 'var(--accent-primary-light)' : 'transparent',
+            border: activeTab === 'invoices' ? '1px solid var(--accent-primary)' : '1px solid transparent',
+            color: activeTab === 'invoices' ? 'var(--accent-primary)' : 'var(--text-muted)',
             fontWeight: 700,
           }}
         >
@@ -94,9 +96,9 @@ export default function FinanceBillingPage() {
           onClick={() => setActiveTab('payments')}
           className="btn-secondary"
           style={{
-            background: activeTab === 'payments' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-            border: activeTab === 'payments' ? '1px solid var(--accent-blue)' : 'none',
-            color: activeTab === 'payments' ? '#ffffff' : 'var(--text-muted)',
+            background: activeTab === 'payments' ? 'var(--accent-primary-light)' : 'transparent',
+            border: activeTab === 'payments' ? '1px solid var(--accent-primary)' : '1px solid transparent',
+            color: activeTab === 'payments' ? 'var(--accent-primary)' : 'var(--text-muted)',
             fontWeight: 700,
           }}
         >
@@ -122,21 +124,21 @@ export default function FinanceBillingPage() {
             <tbody>
               {invoices.map((inv) => (
                 <tr key={inv.id}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-cyan)' }}>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>
                     {inv.invoiceNumber}
                   </td>
                   <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
                     {inv.project?.projectCode}
                   </td>
                   <td>
-                    <div style={{ fontWeight: 600, color: '#ffffff' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                       {inv.client?.user ? `${inv.client.user.firstName} ${inv.client.user.lastName}` : 'Client'}
                     </div>
                     <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>
                       {inv.client?.organization}
                     </div>
                   </td>
-                  <td style={{ fontWeight: 700, color: '#ffffff' }}>
+                  <td style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
                     ${inv.amount} {inv.currency}
                   </td>
                   <td>
@@ -148,8 +150,9 @@ export default function FinanceBillingPage() {
                     {inv.dueDate}
                   </td>
                   <td>
-                    <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem' }}>
-                      Download PDF ⬇
+                    <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <Download size={13} />
+                      <span>Download PDF</span>
                     </button>
                   </td>
                 </tr>

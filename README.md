@@ -1,4 +1,4 @@
-# Inzovate — Research Publication Management ERP
+# Scriptara — Research Publication Management ERP
 ### Enterprise-Grade Scholarly Publishing & Research Lifecycle Operating System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -13,11 +13,11 @@
 
 ---
 
-## 📖 Executive Overview
+## Executive Overview
 
-**Inzovate ERP** is an enterprise-grade, full-lifecycle **Research Publication Management System** built for scholarly service organizations, university research offices, and academic consultancies. 
+**Scriptara ERP** is an enterprise-grade, full-lifecycle **Research Publication Management System** built for scholarly service organizations, university research offices, and academic consultancies. Engineered with an executive, high-clarity **Light Color Theme**, clean vector SVG iconography (Lucide), and seamless role-based workflows.
 
-Unlike traditional journals that manage only their own submissions, Inzovate coordinates the **entire external publication process** for researchers, university faculties, medical institutions, and corporate R&D teams:
+Unlike traditional single-journal platforms, Scriptara orchestrates the **entire external research and publication lifecycle**:
 
 ```
 Researcher Requirement → Topic Finalization → Manuscript Drafting → 10-Point Internal QC 
