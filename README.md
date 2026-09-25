@@ -199,7 +199,17 @@ erDiagram
 
 ---
 
-## 🚀 Quickstart & Setup Guide
+## 🌐 Live Cloud Publishing (Vercel + Render / Railway)
+
+Inzovate ERP is engineered for seamless cloud deployment:
+- **Frontend**: One-click deploy on [Vercel](https://vercel.com) using [`apps/frontend/vercel.json`](file:///d:/Github/inzovate/apps/frontend/vercel.json).
+- **Backend & Database**: One-click deploy on [Render](https://render.com) using our Infrastructure Blueprint [`render.yaml`](file:///d:/Github/inzovate/render.yaml) or on [Railway](https://railway.app) using [`railway.json`](file:///d:/Github/inzovate/railway.json).
+
+👉 **For step-by-step instructions with screenshots and environment variables, read the [Production Publishing Guide](DEPLOYMENT_GUIDE.md).**
+
+---
+
+## 🚀 Local Quickstart & Development Guide
 
 ### System Requirements
 - **Node.js**: $\ge 20.0.0$

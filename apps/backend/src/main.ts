@@ -20,10 +20,30 @@ async function bootstrap() {
   // Security
   app.use(helmet());
   app.use(cookieParser());
+
+  const frontendUrlConfig = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
+  const allowedOrigins = frontendUrlConfig.split(',').map((u) => u.trim());
+
   app.enableCors({
-    origin: frontendUrl,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, mobile, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Match configured origins, wildcard, localhost, or any vercel.app preview
+      const isAllowed =
+        allowedOrigins.includes('*') ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.startsWith('http://localhost:');
+
+      if (isAllowed) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origin ${origin} not permitted by CORS policy`), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
   });
 
   // API versioning
@@ -46,11 +66,12 @@ async function bootstrap() {
   // Global response transform — wraps every response in ApiResponse envelope
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // Swagger (dev only)
-  if (config.get('NODE_ENV') !== 'production') {
+  // Swagger Documentation
+  const enableSwagger = config.get('ENABLE_SWAGGER', 'true') === 'true';
+  if (config.get('NODE_ENV') !== 'production' || enableSwagger) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Inzovate ERP API')
-      .setDescription('Research Publication Management ERP — Phase 1')
+      .setDescription('Research Publication Management ERP — Enterprise API')
       .setVersion('1.0')
       .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
       .build();
@@ -58,7 +79,7 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document, {
       swaggerOptions: { persistAuthorization: true },
     });
-    console.log(`📚 Swagger UI: http://localhost:${port}/api/docs`);
+    console.log(`📚 Swagger UI enabled: http://localhost:${port}/api/docs`);
   }
 
   await app.listen(port);

@@ -1,0 +1,43 @@
+name: CI / Production Build Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Build & Typecheck Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate --schema=apps/backend/prisma/schema.prisma
+
+      - name: Verify Shared Types
+        run: npx tsc -p packages/shared/tsconfig.json --noEmit
+
+      - name: Build NestJS Backend
+        run: |
+          npx tsc -p apps/backend/tsconfig.json --noEmit
+          npm run build --prefix apps/backend
+
+      - name: Build Next.js 14 Frontend
+        run: |
+          npx tsc -p apps/frontend/tsconfig.json --noEmit
+          npm run build --prefix apps/frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
