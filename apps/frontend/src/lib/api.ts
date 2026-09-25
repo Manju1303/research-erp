@@ -91,7 +91,7 @@ class ApiClient {
     }
   }
 
-  private getMockResponse(endpoint: string, options: RequestInit = {}): any {
+  private getMockResponse(endpoint: string, _options: RequestInit = {}): any {
     // Return realistic mocked enterprise data if backend is offline or during testing
     if (endpoint.includes('/dashboard/overview')) {
       return {

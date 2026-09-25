@@ -33,7 +33,7 @@ export class PublicationsService {
   };
 
   async findAll(query: PaginationDto & { search?: string }) {
-    const { skip, take, orderBy } = toPrismaOrderAndPagination(query);
+    const { skip, take, orderBy } = toPrismaOrderAndPagination(query, 'publicationDate');
     const where: any = {};
 
     if (query.search) {
@@ -48,7 +48,7 @@ export class PublicationsService {
         where,
         skip,
         take,
-        orderBy: { publicationDate: 'desc' },
+        orderBy: orderBy ?? { publicationDate: 'desc' },
         include: this.PUB_INCLUDE,
       }),
       this.prisma.publication.count({ where }),

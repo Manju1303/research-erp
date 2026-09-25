@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '../../lib/api';
 import { StatusBadge } from '../../components/StatusBadge';
-import { Edit3, Send, CheckCircle2, Clock } from 'lucide-react';
+import { Edit3, Send, Clock } from 'lucide-react';
 
 export default function SubmissionsPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);

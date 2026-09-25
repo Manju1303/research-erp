@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
-import { Search, UserPlus, ArrowRight, Building2, Mail, Globe, Award } from 'lucide-react';
+import { Search, UserPlus, ArrowRight } from 'lucide-react';
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -72,6 +72,9 @@ export default function ClientsPage() {
       </div>
 
       {/* Researchers Cards Grid */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading authors & researchers...</div>
+      ) : (
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
         {filtered.map((c) => (
           <div
@@ -152,6 +155,7 @@ export default function ClientsPage() {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

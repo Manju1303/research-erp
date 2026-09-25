@@ -11,7 +11,7 @@ export class NotificationsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAllForUser(userId: string, query: PaginationDto & { unreadOnly?: boolean }) {
-    const { skip, take, orderBy } = toPrismaOrderAndPagination(query);
+    const { skip, take, orderBy } = toPrismaOrderAndPagination(query, 'createdAt');
     const where: any = { userId };
     if (query.unreadOnly) where.isRead = false;
 
@@ -20,7 +20,7 @@ export class NotificationsService {
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: orderBy ?? { createdAt: 'desc' },
       }),
       this.prisma.notification.count({ where }),
       this.prisma.notification.count({ where: { userId, isRead: false } }),

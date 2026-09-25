@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
-import { ShieldCheck, Lock, Activity } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 export default function AuditTrailPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -63,6 +63,9 @@ export default function AuditTrailPage() {
       </div>
 
       {/* Audit Logs Table */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading audit trail...</div>
+      ) : (
       <div className="data-table-container">
         <table className="data-table">
           <thead>
@@ -107,6 +110,7 @@ export default function AuditTrailPage() {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

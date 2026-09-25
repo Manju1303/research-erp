@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
-import { MessageSquare, Reply, Plus, X } from 'lucide-react';
+import { Reply, Plus, X } from 'lucide-react';
 
 export default function CommunicationsPage() {
   const [messages, setMessages] = useState<any[]>([]);

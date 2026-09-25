@@ -4,10 +4,8 @@ import {
   IsNumber,
   IsUUID,
   IsDateString,
-  IsEnum,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentStatus } from '@inzovate/shared';
 
 export class CreateInvoiceDto {
   @ApiProperty({ example: 'a12e97aa-3642-4f1b-8531-e123456789ab' })

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, CheckCircle2, XCircle, FileText } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface QCItem {
   id: string;

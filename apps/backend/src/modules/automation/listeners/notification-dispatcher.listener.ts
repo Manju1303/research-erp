@@ -16,7 +16,6 @@ import {
   ProjectStaleEvent,
   TaskCreatedEvent,
   TaskStatusChangedEvent,
-  TaskAssignedEvent,
   TaskOverdueEvent,
   ManuscriptStatusChangedEvent,
   ManuscriptVersionCreatedEvent,

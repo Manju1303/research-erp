@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { StatusBadge } from '../../components/StatusBadge';
-import { User, Calendar, Check, CheckSquare } from 'lucide-react';
+import { User, Calendar, Check } from 'lucide-react';
 
 interface TaskItem {
   id: string;

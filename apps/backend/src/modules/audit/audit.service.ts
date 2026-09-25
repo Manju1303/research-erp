@@ -17,7 +17,7 @@ export class AuditService {
       action?: string;
     },
   ) {
-    const { skip, take, orderBy } = toPrismaOrderAndPagination(query);
+    const { skip, take, orderBy } = toPrismaOrderAndPagination(query, 'createdAt');
     const where: any = {};
 
     if (query.entity) where.entity = query.entity;
@@ -29,7 +29,7 @@ export class AuditService {
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: orderBy ?? { createdAt: 'desc' },
       }),
       this.prisma.auditLog.count({ where }),
     ]);

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateInvoiceDto, RecordPaymentDto } from './dto/finance.dto';
 import {
@@ -25,7 +25,7 @@ export class FinanceService {
   }
 
   async findAllInvoices(query: PaginationDto & { clientId?: string; status?: string }) {
-    const { skip, take, orderBy } = toPrismaOrderAndPagination(query);
+    const { skip, take, orderBy } = toPrismaOrderAndPagination(query, 'issuedAt');
     const where: any = {};
     if (query.clientId) where.clientId = query.clientId;
     if (query.status) where.status = query.status;
@@ -35,7 +35,7 @@ export class FinanceService {
         where,
         skip,
         take,
-        orderBy: { issuedAt: 'desc' },
+        orderBy,
         include: {
           client: { include: { user: { select: { firstName: true, lastName: true, email: true } } } },
           project: { select: { projectCode: true, title: true } },
@@ -52,7 +52,7 @@ export class FinanceService {
   }
 
   async findAllPayments(query: PaginationDto & { clientId?: string; projectId?: string }) {
-    const { skip, take, orderBy } = toPrismaOrderAndPagination(query);
+    const { skip, take, orderBy } = toPrismaOrderAndPagination(query, 'paidAt');
     const where: any = {};
     if (query.clientId) where.clientId = query.clientId;
     if (query.projectId) where.projectId = query.projectId;
@@ -62,7 +62,7 @@ export class FinanceService {
         where,
         skip,
         take,
-        orderBy: { paidAt: 'desc' },
+        orderBy,
         include: {
           client: { include: { user: { select: { firstName: true, lastName: true, email: true } } } },
           project: { select: { projectCode: true, title: true } },

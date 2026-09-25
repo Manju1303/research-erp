@@ -4,7 +4,7 @@ import {
   IsEnum,
   IsUUID,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum DocumentCategory {
   MANUSCRIPT = 'MANUSCRIPT',

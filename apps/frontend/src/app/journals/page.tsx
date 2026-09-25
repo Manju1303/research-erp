@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
-import { Search, Sparkles, AlertTriangle, Check, X, BookOpen } from 'lucide-react';
+import { Search, Sparkles, AlertTriangle, Check, X } from 'lucide-react';
 
 export default function JournalsIntelligencePage() {
   const [journals, setJournals] = useState<any[]>([]);

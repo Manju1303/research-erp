@@ -33,12 +33,15 @@ export class PaginationDto implements PaginationQuery {
 /**
  * Builds Prisma skip/take from page/limit.
  */
-export function toPrismaOrderAndPagination(dto: PaginationDto) {
+export function toPrismaOrderAndPagination(
+  dto: PaginationDto,
+  defaultSortField: string = 'createdAt',
+) {
   const skip = ((dto.page ?? 1) - 1) * (dto.limit ?? 20);
   const take = dto.limit ?? 20;
-  const orderBy = dto.sortBy
+  const orderBy: any = dto.sortBy
     ? { [dto.sortBy]: dto.sortOrder ?? 'desc' }
-    : { createdAt: 'desc' as const };
+    : { [defaultSortField]: 'desc' as const };
   return { skip, take, orderBy };
 }
 

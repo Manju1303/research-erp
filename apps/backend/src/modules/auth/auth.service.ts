@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../database/prisma.service';
 import { TokenService } from './token.service';
-import { LoginDto, RegisterDto } from './dto';
+import { RegisterDto } from './dto';
 import { generateTotpSecret, generateTotpUri, verifyTotpToken } from './mfa/totp.util';
 
 export const MFA_MANDATORY_ROLES = [
@@ -253,7 +253,7 @@ export class AuthService {
             },
           },
         });
-      } catch (err) {
+      } catch {
         // Continue even if audit fails
       }
 

@@ -15,7 +15,6 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
   const port = config.get<number>('PORT', 3001);
-  const frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
 
   // Security
   app.use(helmet());

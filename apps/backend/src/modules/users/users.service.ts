@@ -38,7 +38,7 @@ export class UsersService {
       this.prisma.user.count({ where }),
     ]);
 
-    const data = rawUsers.map(({ passwordHash, ...u }) => u);
+    const data = rawUsers.map(({ passwordHash: _passwordHash, ...u }) => u);
     return { data, meta: buildPaginationMeta(total, query.page ?? 1, query.limit ?? 20) };
   }
 

@@ -12,7 +12,7 @@ import { ShieldCheck, PenTool, UploadCloud, FileText, Download, ArrowRight, Chec
 export default function ProjectWorkspacePage() {
   const params = useParams();
   const projectId = (params?.id as string) || 'proj-1';
-  const { role, displayName } = useAuth();
+  const { displayName } = useAuth();
 
   const [project, setProject] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'manuscript' | 'tasks' | 'documents' | 'history'>('overview');

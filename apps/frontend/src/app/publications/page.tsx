@@ -52,6 +52,18 @@ export default function PublicationsTrackerPage() {
         </button>
       </div>
 
+      {/* Search Filter Bar */}
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="Filter by title, DOI, or journal..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="form-input"
+          style={{ maxWidth: 380 }}
+        />
+      </div>
+
       {/* Publications Table */}
       <div className="data-table-container">
         <table className="data-table">

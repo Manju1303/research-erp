@@ -56,6 +56,11 @@ To address this limitation, we present a self-attention Transformer framework th
             <span style={{ color: 'var(--text-muted)' }}>|</span>
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Manuscript Studio</span>
             <StatusBadge status={selectedVersion === 2 ? 'QC_PENDING' : 'DRAFT'} />
+            {displayName && (
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Editor: {displayName} ({role})
+              </span>
+            )}
           </div>
           <input
             type="text"

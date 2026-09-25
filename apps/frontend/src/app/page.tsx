@@ -74,7 +74,9 @@ export default function DashboardPage() {
                 <Sparkles size={12} />
                 Scriptara Workspace
               </span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Enterprise Research Suite</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                {loading ? 'Syncing workspace telemetry...' : 'Enterprise Research Suite'}
+              </span>
             </div>
             <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Welcome back, {displayName}

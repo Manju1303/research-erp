@@ -21,7 +21,7 @@ export class CommunicationsService {
     userId: string,
     role: string,
   ) {
-    const { skip, take, orderBy } = toPrismaOrderAndPagination(query);
+    const { skip, take, orderBy } = toPrismaOrderAndPagination(query, 'createdAt');
     const where: any = {};
 
     if (query.projectId) where.projectId = query.projectId;
@@ -46,7 +46,7 @@ export class CommunicationsService {
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: orderBy ?? { createdAt: 'desc' },
         include: {
           user: { select: { firstName: true, lastName: true, email: true } },
           client: { select: { organization: true } },
