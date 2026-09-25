@@ -577,16 +577,21 @@ async function main() {
       });
     }
 
-    // Add Initial Project Status History
-    await prisma.projectStatusHistory.create({
-      data: {
-        projectId: project.id,
-        fromStatus: null,
-        toStatus: def.status,
-        note: `Project initialized at lifecycle state: ${def.status}`,
-        changedBy: adminId,
-      },
+    // Add Initial Project Status History if not already present
+    const existingHistory = await prisma.projectStatusHistory.findFirst({
+      where: { projectId: project.id, toStatus: def.status },
     });
+    if (!existingHistory) {
+      await prisma.projectStatusHistory.create({
+        data: {
+          projectId: project.id,
+          fromStatus: null,
+          toStatus: def.status,
+          note: `Project initialized at lifecycle state: ${def.status}`,
+          changedBy: adminId,
+        },
+      });
+    }
   }
 
   // 8. Seed Manuscripts & 10-Point QC Checklists
@@ -695,7 +700,12 @@ async function main() {
     ];
 
     for (const t of tasks) {
-      await prisma.task.create({ data: t });
+      const existingTask = await prisma.task.findFirst({
+        where: { projectId: t.projectId, title: t.title },
+      });
+      if (!existingTask) {
+        await prisma.task.create({ data: t });
+      }
     }
   }
 
@@ -706,35 +716,50 @@ async function main() {
   const stanfordClientId = clientMap['stanford'];
 
   if (p5Id && natureJournalId && stanfordClientId) {
-    const sub = await prisma.submission.create({
-      data: {
-        projectId: p5Id,
-        journalId: natureJournalId,
-        status: SubmissionStatus.ACCEPTED,
-        submissionDate: new Date('2026-06-10'),
-        submissionMethod: 'Nature Manuscript Tracking Portal',
-        submissionRefId: 'NMI-2026-0482',
-        editorialContact: 'editorial@nature.com',
+    let sub = await prisma.submission.findFirst({
+      where: { projectId: p5Id, submissionRefId: 'NMI-2026-0482' },
+    });
+
+    if (!sub) {
+      sub = await prisma.submission.create({
+        data: {
+          projectId: p5Id,
+          journalId: natureJournalId,
+          status: SubmissionStatus.ACCEPTED,
+          submissionDate: new Date('2026-06-10'),
+          submissionMethod: 'Nature Manuscript Tracking Portal',
+          submissionRefId: 'NMI-2026-0482',
+          editorialContact: 'editorial@nature.com',
+        },
+      });
+    }
+
+    const existingPub = await prisma.publication.findFirst({
+      where: {
+        OR: [
+          { submissionId: sub.id },
+          { doi: '10.1038/s42256-026-00388-1' },
+        ],
       },
     });
 
-    await prisma.publication.upsert({
-      where: { submissionId: sub.id },
-      update: {},
-      create: {
-        submissionId: sub.id,
-        projectId: p5Id,
-        title: 'Quantum Key Distribution Networks for Healthcare Telemetry',
-        doi: '10.1038/s42256-026-00388-1',
-        articleUrl: 'https://doi.org/10.1038/s42256-026-00388-1',
-        volume: 'Vol. 8',
-        issue: 'Issue 3',
-        pageNumbers: 'pp. 210–225',
-        publicationDate: new Date('2026-08-15'),
-        finalPdfUrl: 'https://nature.com/articles/s42256-026-00388-1.pdf',
-        certificateUrl: 'https://inzovate.com/certificates/PUB-2026-001.pdf',
-      },
-    });
+    if (!existingPub) {
+      await prisma.publication.create({
+        data: {
+          submissionId: sub.id,
+          projectId: p5Id,
+          title: 'Quantum Key Distribution Networks for Healthcare Telemetry',
+          doi: '10.1038/s42256-026-00388-1',
+          articleUrl: 'https://doi.org/10.1038/s42256-026-00388-1',
+          volume: 'Vol. 8',
+          issue: 'Issue 3',
+          pageNumbers: 'pp. 210–225',
+          publicationDate: new Date('2026-08-15'),
+          finalPdfUrl: 'https://nature.com/articles/s42256-026-00388-1.pdf',
+          certificateUrl: 'https://inzovate.com/certificates/PUB-2026-001.pdf',
+        },
+      });
+    }
 
     // Invoices & Payments
     const invoice = await prisma.invoice.upsert({
@@ -775,38 +800,48 @@ async function main() {
 
   // Communications Log
   if (p1Id && stanfordClientId) {
-    await prisma.communication.create({
-      data: {
-        type: 'JOURNAL_COMMUNICATION',
-        projectId: p1Id,
-        clientId: stanfordClientId,
-        userId: managerId,
-        subject: 'QC Verification Completed — Passed All 10 Criteria',
-        body: 'The manuscript "Deep Learning Approaches in Genomic Variant Detection" has passed the 10-point quality audit with a 3.8% iThenticate similarity index. It is now awaiting client author sign-off.',
-      },
+    const existingComm = await prisma.communication.findFirst({
+      where: { projectId: p1Id, subject: 'QC Verification Completed — Passed All 10 Criteria' },
     });
+    if (!existingComm) {
+      await prisma.communication.create({
+        data: {
+          type: 'JOURNAL_COMMUNICATION',
+          projectId: p1Id,
+          clientId: stanfordClientId,
+          userId: managerId,
+          subject: 'QC Verification Completed — Passed All 10 Criteria',
+          body: 'The manuscript "Deep Learning Approaches in Genomic Variant Detection" has passed the 10-point quality audit with a 3.8% iThenticate similarity index. It is now awaiting client author sign-off.',
+        },
+      });
+    }
   }
 
   // System Audit Logs
-  await prisma.auditLog.create({
-    data: {
-      userId: adminId,
-      userEmail: 'admin@inzovate.com',
-      userRole: 'super_admin',
-      action: 'system.initialization_completed',
-      entity: 'SystemConfig',
-      entityId: 'SYS-INIT-2026',
-      ipAddress: '127.0.0.1',
-      userAgent: 'Inzovate Enterprise Production Seeder V1',
-      metadata: {
-        totalRoles: ROLES.length,
-        totalPermissions: PERMISSIONS.length,
-        totalUsers: USER_SEEDS.length,
-        totalJournals: JOURNAL_SEEDS.length,
-        totalProjects: PROJECT_DEFINITIONS.length,
-      },
-    },
+  const existingAudit = await prisma.auditLog.findFirst({
+    where: { entityId: 'SYS-INIT-2026' },
   });
+  if (!existingAudit) {
+    await prisma.auditLog.create({
+      data: {
+        userId: adminId,
+        userEmail: 'admin@inzovate.com',
+        userRole: 'super_admin',
+        action: 'system.initialization_completed',
+        entity: 'SystemConfig',
+        entityId: 'SYS-INIT-2026',
+        ipAddress: '127.0.0.1',
+        userAgent: 'Inzovate Enterprise Production Seeder V1',
+        metadata: {
+          totalRoles: ROLES.length,
+          totalPermissions: PERMISSIONS.length,
+          totalUsers: USER_SEEDS.length,
+          totalJournals: JOURNAL_SEEDS.length,
+          totalProjects: PROJECT_DEFINITIONS.length,
+        },
+      },
+    });
+  }
 
   console.log('🎉 Enterprise Database Seed Completed Successfully!');
   console.log('   All 9 roles created with password: "Password123!"');
