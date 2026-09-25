@@ -16,7 +16,7 @@ services:
     runtime: node
     plan: free # Can upgrade to starter/standard for production
     region: oregon
-    buildCommand: npm install --include=dev && npx prisma generate --schema=apps/backend/prisma/schema.prisma && npm run build --prefix apps/backend
+    buildCommand: npm install --include=dev && npm run build -w @inzovate/shared && npx prisma generate --schema=apps/backend/prisma/schema.prisma && npm run build --prefix apps/backend
     startCommand: npx prisma db push --schema=apps/backend/prisma/schema.prisma --accept-data-loss && npm run db:seed --prefix apps/backend && npm run start --prefix apps/backend
     envVars:
       - key: NODE_ENV

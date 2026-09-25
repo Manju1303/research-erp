@@ -9,6 +9,7 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
@@ -17,7 +18,8 @@
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@inzovate/shared": ["../../packages/shared/src/index.ts"]
+      "@inzovate/shared": ["../../packages/shared/dist/index.d.ts"]
     }
-  }
+  },
+  "include": ["src/**/*"]
 }
