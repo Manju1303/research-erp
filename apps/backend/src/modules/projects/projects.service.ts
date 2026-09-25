@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   CreateProjectDto,
   UpdateProjectDto,
@@ -21,10 +22,14 @@ import {
   UserRole,
   isValidProjectTransition,
 } from '@inzovate/shared';
+import { DomainEvents } from '../automation/events/domain-events';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   private readonly PROJECT_LIST_INCLUDE = {
     client: {
@@ -220,7 +225,7 @@ export class ProjectsService {
 
     const projectCode = await this.generateProjectCode();
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const project = await tx.project.create({
         data: {
           projectCode,
@@ -254,6 +259,19 @@ export class ProjectsService {
 
       return project;
     });
+
+    // Emit domain event (outside transaction — fire-and-forget)
+    this.eventEmitter.emit(DomainEvents.PROJECT_CREATED, {
+      projectId: result.id,
+      projectCode: result.projectCode,
+      title: dto.title,
+      clientId: dto.clientId,
+      creatorId,
+      managerId: dto.managerId,
+      priority: dto.priority || 'NORMAL',
+    });
+
+    return result;
   }
 
   async update(id: string, dto: UpdateProjectDto, role: string) {
@@ -300,7 +318,7 @@ export class ProjectsService {
       );
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.project.update({
         where: { id },
         data: { status: targetStatus },
@@ -319,6 +337,21 @@ export class ProjectsService {
 
       return updated;
     });
+
+    // Emit domain event
+    this.eventEmitter.emit(DomainEvents.PROJECT_STATUS_CHANGED, {
+      projectId: id,
+      projectCode: project.projectCode,
+      title: project.title,
+      fromStatus: currentStatus,
+      toStatus: targetStatus,
+      changedBy: userId,
+      note: dto.note,
+      clientId: project.clientId,
+      managerId: project.managerId,
+    });
+
+    return result;
   }
 
   async assignStaff(projectId: string, dto: AssignStaffDto, assignedBy: string) {
@@ -332,7 +365,7 @@ export class ProjectsService {
     });
     if (!user) throw new NotFoundException('Staff user not found');
 
-    return this.prisma.projectStaff.upsert({
+    const result = await this.prisma.projectStaff.upsert({
       where: {
         projectId_userId: {
           projectId,
@@ -350,6 +383,17 @@ export class ProjectsService {
         assignedBy,
       },
     });
+
+    // Emit domain event
+    this.eventEmitter.emit(DomainEvents.PROJECT_ASSIGNED, {
+      projectId,
+      projectCode: project.projectCode,
+      userId: dto.userId,
+      role: dto.role,
+      assignedBy,
+    });
+
+    return result;
   }
 
   async removeStaff(projectId: string, userId: string) {

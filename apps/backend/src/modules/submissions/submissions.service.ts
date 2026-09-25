@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateSubmissionDto, UpdateSubmissionStatusDto } from './dto/submission.dto';
 import {
   PaginationDto,
@@ -11,10 +12,14 @@ import {
   buildPaginationMeta,
 } from '../../common/dto/pagination.dto';
 import { SubmissionStatus, ManuscriptStatus } from '@inzovate/shared';
+import { DomainEvents } from '../automation/events/domain-events';
 
 @Injectable()
 export class SubmissionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   private readonly SUBMISSION_INCLUDE = {
     project: {
@@ -93,7 +98,7 @@ export class SubmissionsService {
       }
     }
 
-    return this.prisma.submission.create({
+    const submission = await this.prisma.submission.create({
       data: {
         projectId: dto.projectId,
         journalId: dto.journalId,
@@ -108,6 +113,17 @@ export class SubmissionsService {
       },
       include: this.SUBMISSION_INCLUDE,
     });
+
+    // Emit domain event
+    this.eventEmitter.emit(DomainEvents.SUBMISSION_CREATED, {
+      submissionId: submission.id,
+      projectId: dto.projectId,
+      journalId: dto.journalId,
+      journalName: submission.journal?.name || 'Unknown Journal',
+      manuscriptVersionId: dto.manuscriptVersionId,
+    });
+
+    return submission;
   }
 
   async updateStatus(id: string, dto: UpdateSubmissionStatusDto) {
@@ -119,10 +135,27 @@ export class SubmissionsService {
     };
     if (dto.submissionRefId) updateData.submissionRefId = dto.submissionRefId;
 
-    return this.prisma.submission.update({
+    const updated = await this.prisma.submission.update({
       where: { id },
       data: updateData,
       include: this.SUBMISSION_INCLUDE,
     });
+
+    // Emit domain event
+    const project = await this.prisma.project.findUnique({
+      where: { id: submission.projectId },
+      select: { projectCode: true },
+    });
+
+    this.eventEmitter.emit(DomainEvents.SUBMISSION_STATUS_CHANGED, {
+      submissionId: id,
+      projectId: submission.projectId,
+      projectCode: project?.projectCode || '',
+      fromStatus: submission.status,
+      toStatus: dto.status,
+      journalName: updated.journal?.name || 'Unknown Journal',
+    });
+
+    return updated;
   }
 }

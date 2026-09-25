@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   CreateManuscriptDto,
   CreateManuscriptVersionDto,
@@ -17,10 +18,14 @@ import {
   ManuscriptStatus,
   isValidManuscriptTransition,
 } from '@inzovate/shared';
+import { DomainEvents } from '../automation/events/domain-events';
 
 @Injectable()
 export class ManuscriptsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   private readonly VERSION_INCLUDE = {
     author: {
@@ -123,7 +128,7 @@ export class ManuscriptsService {
 
     const wordCount = dto.content ? dto.content.trim().split(/\s+/).length : 0;
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const manuscript = await tx.manuscript.create({
         data: {
           projectId: dto.projectId,
@@ -151,6 +156,16 @@ export class ManuscriptsService {
 
       return { ...manuscript, versions: [version] };
     });
+
+    // Emit domain event
+    this.eventEmitter.emit(DomainEvents.MANUSCRIPT_CREATED, {
+      manuscriptId: result.id,
+      projectId: dto.projectId,
+      title: dto.title,
+      authorId,
+    });
+
+    return result;
   }
 
   async createNewVersion(manuscriptId: string, dto: CreateManuscriptVersionDto, authorId: string) {
@@ -164,7 +179,7 @@ export class ManuscriptsService {
     const nextVerNumber = latestVer ? latestVer.versionNumber + 1 : 1;
     const wordCount = dto.wordCount || (dto.content ? dto.content.trim().split(/\s+/).length : 0);
 
-    return this.prisma.$transaction(async (tx) => {
+    const newVer = await this.prisma.$transaction(async (tx) => {
       // Mark all previous versions as not latest
       await tx.manuscriptVersion.updateMany({
         where: { manuscriptId },
@@ -195,6 +210,17 @@ export class ManuscriptsService {
 
       return newVersion;
     });
+
+    // Emit domain event
+    this.eventEmitter.emit(DomainEvents.MANUSCRIPT_VERSION_CREATED, {
+      manuscriptId,
+      versionId: newVer.id,
+      projectId: manuscript.projectId,
+      versionNumber: nextVerNumber,
+      authorId,
+    });
+
+    return newVer;
   }
 
   async updateVersion(versionId: string, dto: UpdateManuscriptVersionDto, userId: string, role: string) {
@@ -267,7 +293,7 @@ export class ManuscriptsService {
       );
     }
 
-    return this.prisma.manuscriptVersion.update({
+    const updated = await this.prisma.manuscriptVersion.update({
       where: { id: versionId },
       data: {
         status: targetStatus,
@@ -275,5 +301,19 @@ export class ManuscriptsService {
       },
       include: this.VERSION_INCLUDE,
     });
+
+    // Emit domain event
+    this.eventEmitter.emit(DomainEvents.MANUSCRIPT_STATUS_CHANGED, {
+      versionId,
+      manuscriptId: version.manuscriptId,
+      projectId: version.manuscript.projectId,
+      title: version.title,
+      fromStatus: currentStatus,
+      toStatus: targetStatus,
+      changedBy: userId,
+      notes: dto.notes,
+    });
+
+    return updated;
   }
 }

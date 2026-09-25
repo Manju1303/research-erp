@@ -4,6 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateTaskDto, UpdateTaskDto, UpdateTaskProgressDto } from './dto/task.dto';
 import {
   PaginationDto,
@@ -11,10 +12,14 @@ import {
   buildPaginationMeta,
 } from '../../common/dto/pagination.dto';
 import { UserRole, TaskStatus } from '@inzovate/shared';
+import { DomainEvents } from '../automation/events/domain-events';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   private readonly TASK_INCLUDE = {
     assignee: {
@@ -113,7 +118,7 @@ export class TasksService {
     });
     if (!project) throw new NotFoundException('Project not found');
 
-    return this.prisma.task.create({
+    const task = await this.prisma.task.create({
       data: {
         projectId: dto.projectId,
         title: dto.title,
@@ -126,6 +131,18 @@ export class TasksService {
       },
       include: this.TASK_INCLUDE,
     });
+
+    // Emit domain event
+    this.eventEmitter.emit(DomainEvents.TASK_CREATED, {
+      taskId: task.id,
+      projectId: dto.projectId,
+      title: dto.title,
+      assigneeId: dto.assigneeId,
+      creatorId,
+      dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+    });
+
+    return task;
   }
 
   async update(id: string, dto: UpdateTaskDto, userId: string, role: string) {
@@ -145,11 +162,26 @@ export class TasksService {
       updateData.completionPct = 100;
     }
 
-    return this.prisma.task.update({
+    const updated = await this.prisma.task.update({
       where: { id },
       data: updateData,
       include: this.TASK_INCLUDE,
     });
+
+    // Emit status change event if status actually changed
+    if (dto.status && dto.status !== task.status) {
+      this.eventEmitter.emit(DomainEvents.TASK_STATUS_CHANGED, {
+        taskId: id,
+        projectId: task.projectId,
+        title: task.title,
+        fromStatus: task.status,
+        toStatus: dto.status,
+        assigneeId: task.assigneeId,
+        completionPct: updated.completionPct,
+      });
+    }
+
+    return updated;
   }
 
   async updateProgress(id: string, dto: UpdateTaskProgressDto, userId: string, role: string) {
@@ -164,7 +196,7 @@ export class TasksService {
 
     const completedAt = dto.status === TaskStatus.COMPLETED ? new Date() : null;
 
-    return this.prisma.task.update({
+    const updated = await this.prisma.task.update({
       where: { id },
       data: {
         status: dto.status,
@@ -174,6 +206,21 @@ export class TasksService {
       },
       include: this.TASK_INCLUDE,
     });
+
+    // Emit status change event
+    if (dto.status !== task.status) {
+      this.eventEmitter.emit(DomainEvents.TASK_STATUS_CHANGED, {
+        taskId: id,
+        projectId: task.projectId,
+        title: task.title,
+        fromStatus: task.status,
+        toStatus: dto.status,
+        assigneeId: task.assigneeId,
+        completionPct: dto.completionPct,
+      });
+    }
+
+    return updated;
   }
 
   async softDelete(id: string) {
