@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Download, Check } from 'lucide-react';
 
 interface QCItem {
   id: string;
@@ -12,11 +12,18 @@ interface QCItem {
 }
 
 export default function QualityControlPage() {
+  const [selectedProject, setSelectedProject] = useState('SCR-2026-001');
   const [similarityScore, setSimilarityScore] = useState<number>(3.8);
   const [qcNotes, setQcNotes] = useState(
     'Manuscript adheres strictly to IEEE transactions guidelines. Experimental benchmarks against ClinVar verified. Code reproducibility scripts linked in GitHub repository.',
   );
   const [decision, setDecision] = useState<'QC_PASSED' | 'QC_FAILED'>('QC_PASSED');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   const [checks, setChecks] = useState<QCItem[]>([
     { id: '1', label: 'Novelty & Research Gap Defined', category: 'SCOPE', description: 'Explicit problem statement with clear differentiation from prior SOTA literature.', checked: true },
@@ -41,11 +48,60 @@ export default function QualityControlPage() {
   const allPassed = completedCount === checks.length;
 
   const handleSaveDecision = () => {
-    alert(`QC Verification Decision recorded: ${decision}! Project status updated to ${decision === 'QC_PASSED' ? 'Author Sign-off' : 'Revision Required'}.`);
+    showToast(`QC Verification Decision recorded: ${decision}! Project status updated to ${decision === 'QC_PASSED' ? 'Author Sign-off' : 'Revision Required'}.`);
+  };
+
+  const handleDownloadReport = () => {
+    const reportText = `========================================================================\n` +
+      `ITHENTICATE / TURNITIN AUTHENTICATED SIMILARITY REPORT\n` +
+      `PROJECT: ${selectedProject}\n` +
+      `PRIMARY SIMILARITY INDEX: ${similarityScore}%\n` +
+      `INTERNET SOURCES: 0.8%\n` +
+      `PUBLICATIONS: 2.4%\n` +
+      `STUDENT PAPERS: 0.6%\n` +
+      `========================================================================\n\n` +
+      `QC CLEARANCE: PASSED (Under 10% strict threshold)\n` +
+      `METHODOLOGY VERIFIED: No uncredited verbatim text detected.\n` +
+      `LEAD QUALITY ANALYST: Marcus Vance, PhD\n` +
+      `AUDIT SIGNATURE: 0x9f88421b8c4d12\n`;
+
+    const blob = new Blob([reportText], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `iThenticate_Report_${selectedProject}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast(`Similarity screening report for ${selectedProject} downloaded.`);
   };
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            background: 'var(--accent-navy)',
+            color: '#ffffff',
+            padding: '0.85rem 1.4rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            zIndex: 9999,
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <Check size={16} color="var(--accent-sky)" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* QC Header Banner */}
       <div className="glass-panel" style={{ padding: '1.75rem', position: 'relative', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
@@ -59,6 +115,20 @@ export default function QualityControlPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <select
+              value={selectedProject}
+              onChange={(e) => {
+                setSelectedProject(e.target.value);
+                showToast(`Loaded inspection checklist for ${e.target.value}`);
+              }}
+              className="form-input"
+              style={{ width: 'auto', minWidth: 200, fontWeight: 700 }}
+            >
+              <option value="SCR-2026-001">SCR-2026-001 (Genomic Variants)</option>
+              <option value="SCR-2026-002">SCR-2026-002 (Perovskite Cells)</option>
+              <option value="SCR-2026-003">SCR-2026-003 (Consent Contracts)</option>
+            </select>
+
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Checklist Progress</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: allPassed ? 'var(--accent-emerald)' : 'var(--accent-amber)' }}>
@@ -187,8 +257,20 @@ export default function QualityControlPage() {
               <span>30% (High)</span>
             </div>
 
-            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: '#f8fafc', border: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              Report attached: <strong>iThenticate_Similarity_Report_Ver2.pdf</strong> (0 internet matches exceeding 0.8%)
+            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--twine-1)', border: '1px solid var(--twine-2)', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+              <div>
+                Report: <strong>iThenticate_Report_{selectedProject}.pdf</strong>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>0 matches exceeding 0.8%</div>
+              </div>
+              <button
+                type="button"
+                onClick={handleDownloadReport}
+                className="btn-secondary"
+                style={{ padding: '0.3rem 0.6rem', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+              >
+                <Download size={12} />
+                <span>Download Report</span>
+              </button>
             </div>
           </div>
 

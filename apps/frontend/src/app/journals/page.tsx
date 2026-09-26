@@ -60,6 +60,8 @@ export default function JournalsIntelligencePage() {
     }
   };
 
+  const [selectedJournalGuidelines, setSelectedJournalGuidelines] = useState<any | null>(null);
+
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
       {/* Header Banner */}
@@ -146,7 +148,7 @@ export default function JournalsIntelligencePage() {
                   </div>
                 </td>
                 <td>
-                  <div style={{ fontWeight: 800, color: 'var(--accent-emerald)', fontSize: '0.95rem' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--accent-navy)', fontSize: '0.95rem' }}>
                     {j.impactFactor?.toFixed(1) || '3.2'}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
@@ -167,12 +169,16 @@ export default function JournalsIntelligencePage() {
                   <div>Pub: <strong>{j.publicationDurationDays || 120} days</strong></div>
                 </td>
                 <td>
-                  <span style={{ fontWeight: 700, color: j.apc ? 'var(--accent-emerald)' : 'var(--text-muted)' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--accent-navy)' }}>
                     {j.apc ? `$${j.apc} USD` : 'Free / Subscribed'}
                   </span>
                 </td>
                 <td>
-                  <button className="btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
+                  <button
+                    onClick={() => setSelectedJournalGuidelines(j)}
+                    className="btn-secondary"
+                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
+                  >
                     View Guidelines
                   </button>
                 </td>
@@ -326,6 +332,146 @@ export default function JournalsIntelligencePage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Journal Author Guidelines Modal */}
+      {selectedJournalGuidelines && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.5)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999,
+            padding: '1.5rem',
+          }}
+        >
+          <div
+            className="glass-panel animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: 680,
+              background: '#ffffff',
+              padding: '2rem',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-lg)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Author Submission Guidelines & Scope
+                </span>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-navy)', marginTop: '0.2rem' }}>
+                  {selectedJournalGuidelines.name}
+                </h3>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Publisher: {selectedJournalGuidelines.publisher} • ISSN: {selectedJournalGuidelines.issn || 'N/A'}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedJournalGuidelines(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Metrics Ribbon */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '0.75rem',
+                background: 'var(--twine-1)',
+                border: '1px solid var(--twine-2)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Impact Factor</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-navy)' }}>
+                  {selectedJournalGuidelines.impactFactor?.toFixed(1) || '3.2'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>CiteScore</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-navy)' }}>
+                  {selectedJournalGuidelines.citeScore?.toFixed(1) || '4.1'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Review Time</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {selectedJournalGuidelines.reviewDurationDays || 60} Days
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Article Charge</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: selectedJournalGuidelines.apc ? 'var(--accent-navy)' : 'var(--text-muted)' }}>
+                  {selectedJournalGuidelines.apc ? `$${selectedJournalGuidelines.apc}` : 'None'}
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Instructions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-navy)', marginBottom: '0.35rem' }}>
+                  1. Manuscript Structure & Word Count Limits
+                </h4>
+                <p style={{ lineHeight: 1.6 }}>
+                  Research articles must not exceed <strong>6,500 words</strong> (excluding references, abstract, and figure legends). Structured abstracts are capped at <strong>250 words</strong> with 4–6 indexing keywords.
+                </p>
+              </div>
+
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-navy)', marginBottom: '0.35rem' }}>
+                  2. Citation & Bibliography Formatting
+                </h4>
+                <p style={{ lineHeight: 1.6 }}>
+                  Mandatory citation format is <strong>{selectedJournalGuidelines.referenceStyle || 'IEEE / Nature Numerical'}</strong>. All referenced papers should include registered DOI hyperlinks. iThenticate similarity must be below 10%.
+                </p>
+              </div>
+
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-navy)', marginBottom: '0.35rem' }}>
+                  3. Figures & Data Availability Policy
+                </h4>
+                <p style={{ lineHeight: 1.6 }}>
+                  Figures must be submitted in 300+ DPI vector (PDF/EPS) or high-res TIFF. Public repository links (GitHub/Zenodo/Figshare) for code and datasets are mandatory upon final acceptance.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+              <button
+                onClick={() => setSelectedJournalGuidelines(null)}
+                className="btn-secondary"
+              >
+                Close Guidelines
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedJournalGuidelines(null);
+                  setShowMatcher(true);
+                }}
+                className="btn-primary"
+              >
+                Match With Project
+              </button>
+            </div>
           </div>
         </div>
       )}

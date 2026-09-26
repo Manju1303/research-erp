@@ -12,21 +12,32 @@ export default function ManuscriptStudioPage() {
   const [selectedVersion, setSelectedVersion] = useState(2);
   const [title, setTitle] = useState('Deep Learning Approaches in Somatic Genomic Variant Detection');
   const [activeSection, setActiveSection] = useState<'abstract' | 'intro' | 'methodology' | 'results' | 'references'>('intro');
-  const [content, setContent] = useState(
-    `# 1. Introduction
+  const [manuscriptStatus, setManuscriptStatus] = useState<string>('QC_PENDING');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-High-throughput next-generation sequencing (NGS) has emerged as the cornerstone of precision oncology and clinical genomics. Accurate identification of single nucleotide polymorphisms (SNPs) and structural insertions/deletions (indels) is critical for deciphering disease predisposition and tailoring targeted molecular therapies.
+  const SECTION_CONTENTS: Record<string, string> = {
+    abstract: `# Abstract & Indexing Keywords\n\nAccurate identification of somatic single nucleotide polymorphisms (SNPs) and structural insertions/deletions (indels) in whole exome sequencing remains a foundational challenge in computational oncology. Classical heuristic variant calling pipelines exhibit elevated false discovery rates in low-complexity repeat regions.\n\nHere, we present a transformer-based variant detection architecture that models paired-end read alignments with attention mechanisms, achieving a 2.4% higher F1 score compared to state-of-the-art CNN callers.\n\nKeywords: Deep Learning, Somatic Variant Calling, Attention Mechanism, Precision Oncology, ClinVar Benchmarks.`,
+    intro: `# 1. Introduction\n\nHigh-throughput next-generation sequencing (NGS) has emerged as the cornerstone of precision oncology and clinical genomics. Accurate identification of single nucleotide polymorphisms (SNPs) and structural insertions/deletions (indels) is critical for deciphering disease predisposition and tailoring targeted molecular therapies.\n\nHowever, existing heuristic callers (such as GATK HaplotypeCaller and VarDict) exhibit elevated false discovery rates in low-complexity genomic repeats, homopolymer tracks, and regions with non-uniform sequencing coverage.\n\n## 1.1 Research Gap & Objective\n\nRecent applications of Convolutional Neural Networks (CNNs) (e.g., DeepVariant) transform local read alignments into multi-channel tensor images. While effective, CNNs are inherently restricted by local receptive fields, failing to capture long-range haplotype correlations across distant sequencing fragments.\n\nTo address this limitation, we present a self-attention Transformer framework that ingests raw base quality scores, strand bias, and paired-end topology without heuristic tensor rasterization. Our benchmarks against the ClinVar and Genome in a Bottle (GIAB) gold-standard cohorts demonstrate a 2.4% boost in F1-score with sub-15ms inference latency per megabase.`,
+    methodology: `# 2. Proposed Architecture & Methodology\n\nLet $\\mathcal{X} = \\{r_1, r_2, \\dots, r_N\\}$ denote the set of candidate read alignments spanning a putative variant locus $\\mathcal{L}$. Each read $r_i$ is mapped to a dense embedding $e_i \\in \\mathbb{R}^d$ integrating nucleotide identity, Phred base qualities, mapping confidence scores, and read-pair orientation flags.\n\n## 2.1 Multi-Head Locus Attention\n\nWe pass positional embeddings through an $L$-layer Transformer encoder with $H=8$ attention heads. The cross-read attention matrix $\\mathbf{A}$ dynamically prioritizes reads that span phasing boundaries and concordant allele frequencies:\n\n$$\\mathbf{A} = \\text{softmax}\\left(\\frac{\\mathbf{Q}\\mathbf{K}^T}{\\sqrt{d_k}}\\right)\\mathbf{V}$$\n\nCandidate alleles are subsequently classified via a multi-class softmax head into Homozygous Reference, Heterozygous Variant, or Homozygous Alternate.`,
+    results: `# 3. Empirical Benchmarks & Discussion\n\nWe evaluated our framework against the Genome in a Bottle (GIAB) HG001/NA12878 benchmark dataset and compared precision, recall, and F1-score against GATK HaplotypeCaller (v4.2), DeepVariant (v1.4), and Clair3.\n\n| Architecture | Precision | Recall | F1 Score | Inference / Mb |\n|---|---|---|---|---|\n| GATK HaplotypeCaller | 97.4% | 96.1% | 96.7% | 42.1s |\n| DeepVariant (CNN) | 99.1% | 98.6% | 98.8% | 14.8s |\n| **Proposed Transformer** | **99.5%** | **99.3%** | **99.4%** | **11.2s** |\n\nStatistical significance was confirmed with Wilcoxon signed-rank tests ($p < 0.001$).`,
+    references: `# 4. References & Bibliography\n\n1. Poplin, R., et al. (2018). "A universal SNP and small-indel variant caller using deep neural networks." Nature Biotechnology, 36(10), 983–989. doi:10.1038/nbt.4235\n2. Zook, J. M., et al. (2016). "Extensive sequencing of seven human genomes to characterize benchmark reference materials." Scientific Data, 3, 160025. doi:10.1038/sdata.2016.25\n3. Vaswani, A., et al. (2017). "Attention is all you need." Advances in Neural Information Processing Systems (NeurIPS), 30, 5998–6008.\n4. DePristo, M. A., et al. (2011). "A framework for variation discovery and genotyping using next-generation DNA sequencing data." Nature Genetics, 43(5), 491–498.`,
+  };
 
-However, existing heuristic callers (such as GATK HaplotypeCaller and VarDict) exhibit elevated false discovery rates in low-complexity genomic repeats, homopolymer tracks, and regions with non-uniform sequencing coverage.
-
-## 1.1 Research Gap & Objective
-
-Recent applications of Convolutional Neural Networks (CNNs) (e.g., DeepVariant) transform local read alignments into multi-channel tensor images. While effective, CNNs are inherently restricted by local receptive fields, failing to capture long-range haplotype correlations across distant sequencing fragments.
-
-To address this limitation, we present a self-attention Transformer framework that ingests raw base quality scores, strand bias, and paired-end topology without heuristic tensor rasterization. Our benchmarks against the ClinVar and Genome in a Bottle (GIAB) gold-standard cohorts demonstrate a 2.4% boost in F1-score with sub-15ms inference latency per megabase.`,
-  );
+  const [content, setContent] = useState(SECTION_CONTENTS.intro);
   const [changeNotes, setChangeNotes] = useState('Incorporated peer benchmark evaluations on GIAB dataset.');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleSelectSection = (key: 'abstract' | 'intro' | 'methodology' | 'results' | 'references') => {
+    setActiveSection(key);
+    if (SECTION_CONTENTS[key]) {
+      setContent(SECTION_CONTENTS[key]);
+    }
+  };
 
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
 
@@ -34,17 +45,47 @@ To address this limitation, we present a self-attention Transformer framework th
     setSaveStatus('saving');
     setTimeout(() => {
       setSaveStatus('saved');
+      showToast('Manuscript draft saved successfully.');
       setTimeout(() => setSaveStatus('idle'), 2500);
     }, 600);
   };
 
   const handleCreateVersion = () => {
-    alert(`New Manuscript Version (Draft V${selectedVersion + 1}) created and committed to version tree!`);
     setSelectedVersion(selectedVersion + 1);
+    showToast(`New Manuscript Version (Draft V${selectedVersion + 1}) created and committed to version tree!`);
+  };
+
+  const handleApproveDraft = () => {
+    setManuscriptStatus('CLIENT_APPROVED');
+    showToast('Draft revision approved by Author! Ready for final journal submission.');
   };
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', minHeight: 'calc(100vh - 120px)' }}>
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            background: 'var(--accent-navy)',
+            color: '#ffffff',
+            padding: '0.85rem 1.4rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            zIndex: 9999,
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <Check size={16} color="var(--accent-sky)" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
       {/* Studio Header Bar */}
       <div className="glass-panel" style={{ padding: '1.25rem 1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
@@ -55,7 +96,7 @@ To address this limitation, we present a self-attention Transformer framework th
             </Link>
             <span style={{ color: 'var(--text-muted)' }}>|</span>
             <span style={{ fontWeight: 700, color: 'var(--accent-navy)' }}>Manuscript Studio</span>
-            <StatusBadge status={selectedVersion === 2 ? 'QC_PENDING' : 'DRAFT'} />
+            <StatusBadge status={manuscriptStatus} />
             {userName && (
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 {role === 'client' ? 'Author / Reviewer' : 'Editor'}: <strong style={{ color: 'var(--accent-navy)' }}>{userName}</strong> ({displayName})
@@ -123,9 +164,9 @@ To address this limitation, we present a self-attention Transformer framework th
             </Link>
           ) : (
             <button
-              onClick={() => alert('Draft revision approved by Author! Ready for final submission.')}
+              onClick={handleApproveDraft}
               className="btn-primary"
-              style={{ background: 'var(--gradient-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
               <Check size={15} />
               <span>Approve Draft</span>
@@ -150,7 +191,7 @@ To address this limitation, we present a self-attention Transformer framework th
           ].map((sec) => (
             <button
               key={sec.key}
-              onClick={() => setActiveSection(sec.key as any)}
+              onClick={() => handleSelectSection(sec.key as any)}
               style={{
                 textAlign: 'left',
                 padding: '0.65rem 0.85rem',

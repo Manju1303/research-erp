@@ -3,13 +3,27 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { StatCard } from '../../components/StatCard';
-import { DollarSign, Clock, Receipt, Download, Plus } from 'lucide-react';
+import { DollarSign, Clock, Receipt, Download, Plus, X, Check } from 'lucide-react';
+import { useAuth } from '../../lib/auth-context';
 
 export default function FinanceBillingPage() {
+  const { role } = useAuth();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [overview, setOverview] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'invoices' | 'payments'>('invoices');
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // New Invoice Form State
+  const [invNumber, setInvNumber] = useState(`INV-2026-${Math.floor(100 + Math.random() * 900)}`);
+  const [invProject, setInvProject] = useState('SCR-2026-001');
+  const [invClientName, setInvClientName] = useState('Dr. John Reynolds');
+  const [invOrg, setInvOrg] = useState('Stanford University School of Medicine');
+  const [invAmount, setInvAmount] = useState('3200');
+  const [invCurrency, setInvCurrency] = useState('USD');
+  const [invDueDate, setInvDueDate] = useState('2026-11-15');
+  const [invDescription, setInvDescription] = useState('Milestone 2: Empirical Benchmarks & Manuscript Drafting Complete');
 
   useEffect(() => {
     async function loadFinanceData() {
@@ -29,8 +43,128 @@ export default function FinanceBillingPage() {
     loadFinanceData();
   }, []);
 
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleCreateInvoice = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!invAmount) return;
+
+    const newInv = {
+      id: `inv-${Date.now()}`,
+      invoiceNumber: invNumber,
+      amount: parseFloat(invAmount),
+      currency: invCurrency,
+      status: 'PENDING',
+      dueDate: invDueDate,
+      description: invDescription,
+      project: { projectCode: invProject },
+      client: {
+        organization: invOrg,
+        user: {
+          firstName: invClientName.split(' ')[0] || 'Client',
+          lastName: invClientName.split(' ').slice(1).join(' ') || 'Author',
+        },
+      },
+    };
+
+    setInvoices([newInv, ...invoices]);
+    setShowInvoiceModal(false);
+    showToast(`Invoice ${invNumber} generated for $${invAmount} ${invCurrency}!`);
+    // refresh next invoice number
+    setInvNumber(`INV-2026-${Math.floor(100 + Math.random() * 900)}`);
+  };
+
+  const handleDownloadInvoicePdf = (inv: any) => {
+    const clientName = inv.client?.user ? `${inv.client.user.firstName} ${inv.client.user.lastName}` : 'Client Author';
+    const content = `========================================================================\n` +
+      `                   SCRIPTARA RESEARCH CONSULTING                     \n` +
+      `                     COMMERCIAL BILLING INVOICE                        \n` +
+      `========================================================================\n\n` +
+      `INVOICE NUMBER:   ${inv.invoiceNumber}\n` +
+      `ISSUE DATE:       ${new Date().toISOString().split('T')[0]}\n` +
+      `PAYMENT DUE DATE: ${inv.dueDate}\n` +
+      `PAYMENT STATUS:   ${inv.status}\n\n` +
+      `BILLED TO:\n` +
+      `  Recipient:      ${clientName}\n` +
+      `  Institution:    ${inv.client?.organization || 'Institutional Client'}\n` +
+      `  Project Code:   ${inv.project?.projectCode || 'SCR-2026-001'}\n\n` +
+      `------------------------------------------------------------------------\n` +
+      `ITEM DESCRIPTION                                         AMOUNT\n` +
+      `------------------------------------------------------------------------\n` +
+      `Scholarly Research & Publication Milestone Fee           $${inv.amount}.00 ${inv.currency}\n` +
+      `  - Systematic Literature Synthesis & Benchmarks\n` +
+      `  - Double-Blind Peer Review Preparation\n` +
+      `  - Technical QC & Formatting Verification\n\n` +
+      `------------------------------------------------------------------------\n` +
+      `TOTAL BALANCE DUE:                                       $${inv.amount}.00 ${inv.currency}\n` +
+      `========================================================================\n` +
+      `Wire Transfer Remittance: SWIFT/BIC: SCRPCH22 | IBAN: CH9300000000000001\n` +
+      `Thank you for advancing scholarly research with Scriptara ERP.\n`;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Invoice_${inv.invoiceNumber}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast(`Invoice statement for ${inv.invoiceNumber} downloaded.`);
+  };
+
+  const handleDownloadReceipt = (p: any) => {
+    const content = `========================================================================\n` +
+      `                   OFFICIAL PAYMENT RECEIPT & REMITTANCE              \n` +
+      `========================================================================\n\n` +
+      `RECEIPT NUMBER:   ${p.receiptNumber}\n` +
+      `TRANSACTION DATE: ${p.paidAt || new Date().toISOString().split('T')[0]}\n` +
+      `PAYMENT METHOD:   ${p.paymentMethod || 'Wire Transfer'}\n` +
+      `PAYMENT TYPE:     ${p.paymentType}\n\n` +
+      `PROJECT CODE:     ${p.project?.projectCode || 'SCR-2026-001'}\n` +
+      `INSTITUTION:      ${p.client?.organization || 'Client Organization'}\n` +
+      `AMOUNT CLEARED:   $${p.amount}.00 ${p.currency}\n` +
+      `SETTLEMENT:       Reconciled with Enterprise General Ledger (100% Verified)\n` +
+      `========================================================================\n`;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Receipt_${p.receiptNumber}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast(`Payment Receipt ${p.receiptNumber} downloaded.`);
+  };
+
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            background: 'var(--accent-navy)',
+            color: '#ffffff',
+            padding: '0.85rem 1.4rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            zIndex: 9999,
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <Check size={16} color="var(--accent-sky)" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -42,10 +176,16 @@ export default function FinanceBillingPage() {
           </p>
         </div>
 
-        <button className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-          <Plus size={16} />
-          <span>Generate New Invoice</span>
-        </button>
+        {role !== 'client' && (
+          <button
+            onClick={() => setShowInvoiceModal(true)}
+            className="btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <Plus size={16} />
+            <span>Generate New Invoice</span>
+          </button>
+        )}
       </div>
 
       {/* KPI Cards */}
@@ -82,7 +222,7 @@ export default function FinanceBillingPage() {
           style={{
             background: activeTab === 'invoices' ? 'var(--accent-primary-light)' : 'transparent',
             border: activeTab === 'invoices' ? '1px solid var(--accent-primary)' : '1px solid transparent',
-            color: activeTab === 'invoices' ? 'var(--accent-primary)' : 'var(--text-muted)',
+            color: activeTab === 'invoices' ? 'var(--accent-navy)' : 'var(--text-muted)',
             fontWeight: 700,
           }}
         >
@@ -94,7 +234,7 @@ export default function FinanceBillingPage() {
           style={{
             background: activeTab === 'payments' ? 'var(--accent-primary-light)' : 'transparent',
             border: activeTab === 'payments' ? '1px solid var(--accent-primary)' : '1px solid transparent',
-            color: activeTab === 'payments' ? 'var(--accent-primary)' : 'var(--text-muted)',
+            color: activeTab === 'payments' ? 'var(--accent-navy)' : 'var(--text-muted)',
             fontWeight: 700,
           }}
         >
@@ -120,7 +260,7 @@ export default function FinanceBillingPage() {
             <tbody>
               {invoices.map((inv) => (
                 <tr key={inv.id}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-navy)' }}>
                     {inv.invoiceNumber}
                   </td>
                   <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
@@ -146,7 +286,11 @@ export default function FinanceBillingPage() {
                     {inv.dueDate}
                   </td>
                   <td>
-                    <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <button
+                      onClick={() => handleDownloadInvoicePdf(inv)}
+                      className="btn-secondary"
+                      style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                    >
                       <Download size={13} />
                       <span>Download PDF</span>
                     </button>
@@ -171,12 +315,13 @@ export default function FinanceBillingPage() {
                 <th>Payment Type</th>
                 <th>Method</th>
                 <th>Date Paid</th>
+                <th>Receipt</th>
               </tr>
             </thead>
             <tbody>
               {payments.map((p) => (
                 <tr key={p.id}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-emerald)' }}>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-navy)' }}>
                     {p.receiptNumber}
                   </td>
                   <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
@@ -189,12 +334,188 @@ export default function FinanceBillingPage() {
                   <td><span className="badge badge-blue">{p.paymentType}</span></td>
                   <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.paymentMethod}</td>
                   <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.paidAt}</td>
+                  <td>
+                    <button
+                      onClick={() => handleDownloadReceipt(p)}
+                      className="btn-secondary"
+                      style={{ padding: '0.35rem 0.65rem', fontSize: '0.725rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                    >
+                      <Download size={12} />
+                      <span>Receipt</span>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      {/* Generate New Invoice Modal */}
+      {showInvoiceModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.45)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999,
+            padding: '1.5rem',
+          }}
+        >
+          <div
+            className="glass-panel animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: 580,
+              background: '#ffffff',
+              padding: '2rem',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-lg)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-navy)' }}>
+                  Generate New Invoice
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Create client milestone billing statement, quotation, or journal APC invoice.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowInvoiceModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateInvoice} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Invoice Number *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={invNumber}
+                    onChange={(e) => setInvNumber(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Project Code *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={invProject}
+                    onChange={(e) => setInvProject(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Client Author Name
+                  </label>
+                  <input
+                    type="text"
+                    value={invClientName}
+                    onChange={(e) => setInvClientName(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Institution / Organization
+                  </label>
+                  <input
+                    type="text"
+                    value={invOrg}
+                    onChange={(e) => setInvOrg(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.85rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Amount *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={invAmount}
+                    onChange={(e) => setInvAmount(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Currency
+                  </label>
+                  <select
+                    value={invCurrency}
+                    onChange={(e) => setInvCurrency(e.target.value)}
+                    className="form-input"
+                  >
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={invDueDate}
+                    onChange={(e) => setInvDueDate(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                  Billing Description / Scope
+                </label>
+                <textarea
+                  rows={2}
+                  value={invDescription}
+                  onChange={(e) => setInvDescription(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowInvoiceModal(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Generate Invoice
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

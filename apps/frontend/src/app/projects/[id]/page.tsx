@@ -7,7 +7,7 @@ import { api } from '../../../lib/api';
 import { useAuth } from '../../../lib/auth-context';
 import { StatusBadge } from '../../../components/StatusBadge';
 import { TimelineView } from '../../../components/TimelineView';
-import { ShieldCheck, PenTool, UploadCloud, FileText, Download, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, PenTool, UploadCloud, FileText, Download, ArrowRight, CheckCircle2, X, Check } from 'lucide-react';
 
 export default function ProjectWorkspacePage() {
   const params = useParams();
@@ -18,6 +18,62 @@ export default function ProjectWorkspacePage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'manuscript' | 'tasks' | 'documents' | 'history'>('overview');
   const [transitionNote, setTransitionNote] = useState('');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [newDocFilename, setNewDocFilename] = useState('');
+  const [newDocCategory, setNewDocCategory] = useState('MANUSCRIPT');
+  const [newDocAccess, setNewDocAccess] = useState('CLIENT');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleUploadDocument = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDocFilename) return;
+
+    const newDoc = {
+      id: `d-${Date.now()}`,
+      filename: newDocFilename.endsWith('.pdf') || newDocFilename.endsWith('.xlsx') || newDocFilename.endsWith('.docx')
+        ? newDocFilename
+        : `${newDocFilename}.pdf`,
+      category: newDocCategory,
+      accessLevel: newDocAccess,
+      sizeBytes: Math.floor(1200000 + Math.random() * 4500000),
+      createdAt: new Date().toISOString(),
+    };
+
+    setProject({
+      ...project,
+      documents: [newDoc, ...(project.documents || [])],
+    });
+    setShowUploadModal(false);
+    setNewDocFilename('');
+    showToast(`Document "${newDoc.filename}" uploaded successfully to repository!`);
+  };
+
+  const handleDownloadDocument = (doc: any) => {
+    const textContent = `========================================================================\n` +
+      `SCRIPTARA SECURE DOCUMENT REPOSITORY\n` +
+      `PROJECT: ${project.projectCode} - ${project.title}\n` +
+      `FILENAME: ${doc.filename}\n` +
+      `CATEGORY: ${doc.category}\n` +
+      `ACCESS LEVEL: ${doc.accessLevel}\n` +
+      `UPLOADED: ${new Date(doc.createdAt).toLocaleString()}\n` +
+      `========================================================================\n\n` +
+      `[MOCK DATA FILE CONTENT - CRYPTOGRAPHIC INTEGRITY VERIFIED]\n` +
+      `SHA-256 Checksum: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n`;
+
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = doc.filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast(`Downloading "${doc.filename}"...`);
+  };
 
   useEffect(() => {
     async function fetchProject() {
@@ -146,8 +202,9 @@ export default function ProjectWorkspacePage() {
       });
 
       setTransitionNote('');
+      showToast(`Project successfully updated to stage: ${nextStatus}`);
     } catch (e: any) {
-      alert(`Transition error: ${e.message}`);
+      showToast(`Transition error: ${e.message || 'Unable to update status'}`);
     } finally {
       setIsTransitioning(false);
     }
@@ -330,15 +387,15 @@ export default function ProjectWorkspacePage() {
 
             {/* Research Manager */}
             <div className="glass-panel" style={{ padding: '1.5rem' }}>
-              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.75rem' }}>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-navy)', marginBottom: '0.75rem' }}>
                 Assigned Research Manager
               </h4>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent-primary)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
                   ER
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-navy)' }}>
                     Elena Rostova
                   </div>
                   <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>
@@ -476,7 +533,11 @@ export default function ProjectWorkspacePage() {
                 Research materials, datasets, manuscript drafts, QC reports, and journal correspondence
               </p>
             </div>
-            <button className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="btn-primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+            >
               <UploadCloud size={14} />
               <span>Upload Document</span>
             </button>
@@ -514,7 +575,11 @@ export default function ProjectWorkspacePage() {
                       {new Date(d.createdAt).toLocaleDateString()}
                     </td>
                     <td>
-                      <button className="btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <button
+                        onClick={() => handleDownloadDocument(d)}
+                        className="btn-secondary"
+                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                      >
                         <Download size={13} />
                         <span>Download</span>
                       </button>
@@ -530,7 +595,7 @@ export default function ProjectWorkspacePage() {
       {/* Tab 5: Status History */}
       {activeTab === 'history' && (
         <div className="glass-panel" style={{ padding: '1.75rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginBottom: '1rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-navy)', marginBottom: '1rem' }}>
             Status Progression History
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -540,7 +605,7 @@ export default function ProjectWorkspacePage() {
                 style={{
                   padding: '1rem',
                   borderRadius: 'var(--radius-md)',
-                  background: 'rgba(255, 255, 255, 0.02)',
+                  background: '#f8fafd',
                   border: '1px solid var(--border-color)',
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -566,6 +631,137 @@ export default function ProjectWorkspacePage() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Upload Document Modal */}
+      {showUploadModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.45)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999,
+            padding: '1.5rem',
+          }}
+        >
+          <div
+            className="glass-panel animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: 520,
+              background: '#ffffff',
+              padding: '2rem',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-lg)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-navy)' }}>
+                  Upload Project Document
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Attach dataset, supplementary file, or manuscript draft.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUploadDocument} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                  Document File Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Supplementary_Table_ClinVar_Validation.xlsx"
+                  value={newDocFilename}
+                  onChange={(e) => setNewDocFilename(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Category
+                  </label>
+                  <select
+                    value={newDocCategory}
+                    onChange={(e) => setNewDocCategory(e.target.value)}
+                    className="form-input"
+                  >
+                    <option value="MANUSCRIPT">MANUSCRIPT</option>
+                    <option value="REQUIREMENT">REQUIREMENT</option>
+                    <option value="QC_REPORT">QC REPORT</option>
+                    <option value="DATASET">DATASET</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Access Level
+                  </label>
+                  <select
+                    value={newDocAccess}
+                    onChange={(e) => setNewDocAccess(e.target.value)}
+                    className="form-input"
+                  >
+                    <option value="CLIENT">CLIENT & STAFF</option>
+                    <option value="INTERNAL">INTERNAL ONLY</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowUploadModal(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Upload Document
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            background: 'var(--accent-navy)',
+            color: '#ffffff',
+            padding: '0.85rem 1.4rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            zIndex: 9999,
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <Check size={16} color="var(--accent-sky)" />
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

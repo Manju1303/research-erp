@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
-import { Reply, Plus, X } from 'lucide-react';
+import { Reply, Plus, X, Check } from 'lucide-react';
 
 export default function CommunicationsPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -11,6 +11,12 @@ export default function CommunicationsPage() {
   const [newType, setNewType] = useState('CLIENT_COMMENT');
   const [newSubject, setNewSubject] = useState('');
   const [newBody, setNewBody] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   useEffect(() => {
     async function loadCommunications() {
@@ -41,10 +47,43 @@ export default function CommunicationsPage() {
     setShowCompose(false);
     setNewSubject('');
     setNewBody('');
+    showToast(`Communication note logged successfully!`);
+  };
+
+  const handleReply = (msg: any) => {
+    setNewSubject(`Re: ${msg.subject || 'Communication Note'}`);
+    setNewType(msg.type);
+    setNewBody(`> On ${new Date(msg.createdAt).toLocaleDateString()}, ${msg.user?.firstName || 'User'} wrote:\n> ${msg.body.slice(0, 100)}...\n\n`);
+    setShowCompose(true);
   };
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            background: 'var(--accent-navy)',
+            color: '#ffffff',
+            padding: '0.85rem 1.4rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            zIndex: 9999,
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <Check size={16} color="var(--accent-sky)" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -131,7 +170,11 @@ export default function CommunicationsPage() {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.5rem', borderTop: '1px solid #f1f5f9', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               <span>Recorded by: <strong>{msg.user?.firstName} {msg.user?.lastName}</strong></span>
-              <button className="btn-secondary" style={{ padding: '0.25rem 0.65rem', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              <button
+                onClick={() => handleReply(msg)}
+                className="btn-secondary"
+                style={{ padding: '0.25rem 0.65rem', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+              >
                 <Reply size={12} />
                 <span>Reply / Follow-up</span>
               </button>

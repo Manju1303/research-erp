@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, Calendar, Check } from 'lucide-react';
+import { User, Calendar, Check, Plus, X } from 'lucide-react';
 
 interface TaskItem {
   id: string;
@@ -25,12 +25,46 @@ export default function TasksKanbanPage() {
   ]);
 
   const [activeFilter, setActiveFilter] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskProject, setNewTaskProject] = useState('SCR-2026-001');
+  const [newTaskAssignee, setNewTaskAssignee] = useState('Dr. Sarah Chen');
+  const [newTaskPriority, setNewTaskPriority] = useState<'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'>('NORMAL');
+  const [newTaskStatus, setNewTaskStatus] = useState<'TODO' | 'IN_PROGRESS' | 'UNDER_REVIEW' | 'COMPLETED'>('TODO');
+  const [newTaskDueDate, setNewTaskDueDate] = useState('2026-11-15');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleCreateTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskTitle) return;
+
+    const newTask: TaskItem = {
+      id: `task-${Date.now()}`,
+      projectCode: newTaskProject,
+      title: newTaskTitle,
+      status: newTaskStatus,
+      priority: newTaskPriority,
+      completionPct: newTaskStatus === 'COMPLETED' ? 100 : newTaskStatus === 'IN_PROGRESS' ? 40 : 0,
+      assignee: newTaskAssignee,
+      dueDate: newTaskDueDate,
+    };
+
+    setTasks([...tasks, newTask]);
+    setShowCreateModal(false);
+    setNewTaskTitle('');
+    showToast(`Task "${newTask.title.slice(0, 28)}..." added to board!`);
+  };
 
   const COLUMNS = [
     { key: 'TODO', label: 'To Do', color: 'var(--text-muted)' },
     { key: 'IN_PROGRESS', label: 'In Progress', color: 'var(--accent-primary)' },
-    { key: 'UNDER_REVIEW', label: 'Under Review', color: 'var(--accent-amber)' },
-    { key: 'COMPLETED', label: 'Completed', color: 'var(--accent-emerald)' },
+    { key: 'UNDER_REVIEW', label: 'Under Review', color: 'var(--accent-navy)' },
+    { key: 'COMPLETED', label: 'Completed', color: 'var(--accent-navy)' },
   ];
 
   const moveTask = (taskId: string, targetStatus: any) => {
@@ -43,6 +77,7 @@ export default function TasksKanbanPage() {
         return t;
       }),
     );
+    showToast(`Task moved to ${targetStatus}!`);
   };
 
   const filteredTasks = tasks.filter((t) => {
@@ -52,6 +87,31 @@ export default function TasksKanbanPage() {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            background: 'var(--accent-navy)',
+            color: '#ffffff',
+            padding: '0.85rem 1.4rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            zIndex: 9999,
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <Check size={16} color="var(--accent-sky)" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -63,25 +123,37 @@ export default function TasksKanbanPage() {
           </p>
         </div>
 
-        {/* Priority Filter Buttons */}
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Priority:</span>
-          {['', 'URGENT', 'HIGH', 'NORMAL'].map((p) => (
-            <button
-              key={p}
-              onClick={() => setActiveFilter(p)}
-              className="btn-secondary"
-              style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.75rem',
-                background: activeFilter === p ? 'var(--accent-primary-light)' : '#ffffff',
-                border: activeFilter === p ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                color: activeFilter === p ? 'var(--accent-primary)' : 'var(--text-secondary)',
-              }}
-            >
-              {p || 'All'}
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Priority Filter Buttons */}
+          <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Priority:</span>
+            {['', 'URGENT', 'HIGH', 'NORMAL'].map((p) => (
+              <button
+                key={p}
+                onClick={() => setActiveFilter(p)}
+                className="btn-secondary"
+                style={{
+                  padding: '0.35rem 0.65rem',
+                  fontSize: '0.75rem',
+                  background: activeFilter === p ? 'var(--accent-primary-light)' : '#ffffff',
+                  border: activeFilter === p ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                  color: activeFilter === p ? 'var(--accent-navy)' : 'var(--text-secondary)',
+                  fontWeight: activeFilter === p ? 700 : 500,
+                }}
+              >
+                {p || 'All'}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <Plus size={15} />
+            <span>Create Task</span>
+          </button>
         </div>
       </div>
 
@@ -240,6 +312,152 @@ export default function TasksKanbanPage() {
           );
         })}
       </div>
+
+      {/* Create Task Modal */}
+      {showCreateModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.45)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999,
+            padding: '1.5rem',
+          }}
+        >
+          <div
+            className="glass-panel animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: 540,
+              background: '#ffffff',
+              padding: '2rem',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-lg)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-navy)' }}>
+                  Create Development Task
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Assign actionable work item to research staff, reviewers, or publication desk.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateTask} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                  Task Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Verify ROC curve legends and supplementary figures"
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Project Code *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newTaskProject}
+                    onChange={(e) => setNewTaskProject(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Assignee Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newTaskAssignee}
+                    onChange={(e) => setNewTaskAssignee(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.85rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Initial Column
+                  </label>
+                  <select
+                    value={newTaskStatus}
+                    onChange={(e) => setNewTaskStatus(e.target.value as any)}
+                    className="form-input"
+                  >
+                    <option value="TODO">To Do</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="UNDER_REVIEW">Under Review</option>
+                    <option value="COMPLETED">Completed</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Priority
+                  </label>
+                  <select
+                    value={newTaskPriority}
+                    onChange={(e) => setNewTaskPriority(e.target.value as any)}
+                    className="form-input"
+                  >
+                    <option value="NORMAL">NORMAL</option>
+                    <option value="HIGH">HIGH</option>
+                    <option value="URGENT">URGENT</option>
+                    <option value="LOW">LOW</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={newTaskDueDate}
+                    onChange={(e) => setNewTaskDueDate(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Add Task to Board
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

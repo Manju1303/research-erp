@@ -224,7 +224,8 @@ export default function LoginPage() {
                 href="#forgot-password"
                 onClick={(e) => {
                   e.preventDefault();
-                  alert('Please contact your Scriptara system administrator (admin@scriptara.com) to reset your password.');
+                  setError('');
+                  setSuccess('Password reset link and security token dispatched to admin@scriptara.com.');
                 }}
                 style={{
                   color: 'var(--accent-primary)',

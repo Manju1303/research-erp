@@ -15,6 +15,12 @@ export default function ProjectsPage() {
   const [priorityFilter, setPriorityFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   // New Project Form State
   const [newTitle, setNewTitle] = useState('');
@@ -96,11 +102,12 @@ export default function ProjectsPage() {
 
       setProjects([createdItem, ...projects]);
       setShowModal(false);
+      showToast(`Research project "${newTitle.slice(0, 32)}..." registered successfully!`);
       setNewTitle('');
       setNewDomain('');
       setNewDescription('');
     } catch (err: any) {
-      alert(`Could not create project: ${err.message}`);
+      showToast(`Could not create project: ${err.message || 'Server error'}`);
     }
   };
 
@@ -117,12 +124,10 @@ export default function ProjectsPage() {
           </p>
         </div>
 
-        {role !== 'client' && (
-          <button onClick={() => setShowModal(true)} className="btn-primary">
-            <Plus size={16} />
-            <span>Initiate Research Project</span>
-          </button>
-        )}
+        <button onClick={() => setShowModal(true)} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Plus size={16} />
+          <span>{role === 'client' ? 'Submit Research Requirement' : 'Initiate Research Project'}</span>
+        </button>
       </div>
 
       {/* Filter and Search Bar */}
@@ -296,11 +301,13 @@ export default function ProjectsPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  Initiate Research Project
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-navy)' }}>
+                  {role === 'client' ? 'Submit New Research Requirement' : 'Initiate Research Project'}
                 </h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Collect full research requirement specifications and target indexing criteria
+                  {role === 'client'
+                    ? 'Submit your research hypothesis, target journal tier, and study objectives to our editorial team.'
+                    : 'Collect full research requirement specifications and target indexing criteria.'}
                 </p>
               </div>
               <button
@@ -426,6 +433,41 @@ export default function ProjectsPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          className="animate-fade-in"
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            zIndex: 9999,
+            backgroundColor: 'var(--accent-navy)',
+            color: '#ffffff',
+            padding: '0.85rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            border: '1px solid var(--accent-ice)',
+          }}
+        >
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              backgroundColor: 'var(--accent-ice)',
+              boxShadow: '0 0 8px var(--accent-ice)',
+            }}
+          />
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>
