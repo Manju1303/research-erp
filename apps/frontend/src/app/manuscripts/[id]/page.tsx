@@ -7,7 +7,7 @@ import { StatusBadge } from '../../../components/StatusBadge';
 import { ShieldCheck, Plus, Check, ArrowLeft } from 'lucide-react';
 
 export default function ManuscriptStudioPage() {
-  const { role, displayName } = useAuth();
+  const { role, displayName, userName } = useAuth();
 
   const [selectedVersion, setSelectedVersion] = useState(2);
   const [title, setTitle] = useState('Deep Learning Approaches in Somatic Genomic Variant Detection');
@@ -44,7 +44,7 @@ To address this limitation, we present a self-attention Transformer framework th
   };
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: 'calc(100vh - 120px)' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', minHeight: 'calc(100vh - 120px)' }}>
       {/* Studio Header Bar */}
       <div className="glass-panel" style={{ padding: '1.25rem 1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
@@ -54,11 +54,11 @@ To address this limitation, we present a self-attention Transformer framework th
               <span>SCR-2026-001 Workspace</span>
             </Link>
             <span style={{ color: 'var(--text-muted)' }}>|</span>
-            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Manuscript Studio</span>
+            <span style={{ fontWeight: 700, color: 'var(--accent-navy)' }}>Manuscript Studio</span>
             <StatusBadge status={selectedVersion === 2 ? 'QC_PENDING' : 'DRAFT'} />
-            {displayName && (
+            {userName && (
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Editor: {displayName} ({role})
+                {role === 'client' ? 'Author / Reviewer' : 'Editor'}: <strong style={{ color: 'var(--accent-navy)' }}>{userName}</strong> ({displayName})
               </span>
             )}
           </div>
@@ -68,13 +68,14 @@ To address this limitation, we present a self-attention Transformer framework th
             onChange={(e) => setTitle(e.target.value)}
             className="form-input"
             style={{
-              fontSize: '1.15rem',
+              fontSize: '1.2rem',
               fontWeight: 800,
-              color: 'var(--text-primary)',
+              color: 'var(--accent-navy)',
               background: 'transparent',
               border: 'none',
               padding: 0,
-              width: 650,
+              width: '100%',
+              maxWidth: 750,
               boxShadow: 'none',
             }}
           />
@@ -83,7 +84,7 @@ To address this limitation, we present a self-attention Transformer framework th
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {/* Version Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafc', border: '1px solid var(--border-color)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafd', border: '1px solid var(--border-color)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Version:</span>
             <select
               value={selectedVersion}
@@ -108,20 +109,33 @@ To address this limitation, we present a self-attention Transformer framework th
             ) : 'Save Draft'}
           </button>
 
-          <button onClick={handleCreateVersion} className="btn-primary">
-            <Plus size={14} />
-            <span>Tag Version V{selectedVersion + 1}</span>
-          </button>
+          {role !== 'client' && (
+            <button onClick={handleCreateVersion} className="btn-primary">
+              <Plus size={14} />
+              <span>Tag Version V{selectedVersion + 1}</span>
+            </button>
+          )}
 
-          <Link href="/qc" className="btn-primary" style={{ background: 'var(--gradient-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-            <ShieldCheck size={15} />
-            <span>Submit to QC</span>
-          </Link>
+          {role !== 'client' ? (
+            <Link href="/qc" className="btn-primary" style={{ background: 'var(--gradient-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <ShieldCheck size={15} />
+              <span>Submit to QC</span>
+            </Link>
+          ) : (
+            <button
+              onClick={() => alert('Draft revision approved by Author! Ready for final submission.')}
+              className="btn-primary"
+              style={{ background: 'var(--gradient-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Check size={15} />
+              <span>Approve Draft</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Editor & Outline Container */}
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr 300px', gap: '1.25rem', flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr 300px', gap: '1.25rem', minHeight: 520, flex: 1 }}>
         {/* Left: Paper Outline & Structural Sections */}
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto' }}>
           <h4 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
@@ -143,9 +157,9 @@ To address this limitation, we present a self-attention Transformer framework th
                 borderRadius: 'var(--radius-md)',
                 fontSize: '0.825rem',
                 fontWeight: activeSection === sec.key ? 700 : 500,
-                color: activeSection === sec.key ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                color: activeSection === sec.key ? 'var(--accent-navy)' : 'var(--text-secondary)',
                 background: activeSection === sec.key ? 'var(--accent-primary-light)' : 'transparent',
-                border: activeSection === sec.key ? '1px solid #c7d2fe' : '1px solid transparent',
+                border: activeSection === sec.key ? '1px solid var(--accent-primary)' : '1px solid transparent',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
@@ -161,21 +175,24 @@ To address this limitation, we present a self-attention Transformer framework th
         </div>
 
         {/* Center: Live Manuscript Body Editor */}
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', minHeight: 0, background: '#ffffff' }}>
+        <div className="glass-panel" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', minHeight: 520, background: '#ffffff' }}>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             style={{
               flex: 1,
+              minHeight: 480,
+              height: '100%',
               width: '100%',
               background: 'transparent',
               border: 'none',
               color: 'var(--text-primary)',
               fontFamily: 'var(--font-sans)',
               fontSize: '0.95rem',
-              lineHeight: 1.7,
+              lineHeight: 1.8,
               resize: 'none',
               outline: 'none',
+              paddingBottom: '3.5rem',
             }}
           />
         </div>

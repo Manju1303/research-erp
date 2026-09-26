@@ -62,7 +62,7 @@ export const TimelineView: React.FC<{ currentStatus: string }> = ({ currentStatu
                       : '#f1f5f9',
                     color: isDone || isCurrent ? '#ffffff' : 'var(--text-muted)',
                     border: isCurrent ? '2px solid #ffffff' : isDone ? 'none' : '1px solid var(--border-color)',
-                    boxShadow: isCurrent ? '0 0 10px rgba(79, 70, 229, 0.4)' : 'none',
+                    boxShadow: isCurrent ? '0 0 10px rgba(98, 142, 203, 0.45)' : 'none',
                     transition: 'all 0.2s ease',
                   }}
                 >

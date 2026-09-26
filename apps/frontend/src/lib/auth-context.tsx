@@ -28,6 +28,7 @@ interface AuthContextType {
   user: AuthUser | null;
   role: string;
   displayName: string;
+  userName: string;
   switchRole: (roleKey: string) => void;
   logout: () => void;
   login: (email: string, pass: string) => Promise<boolean>;
@@ -37,6 +38,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   role: 'super_admin',
   displayName: 'Super Administrator',
+  userName: 'Alex Vance',
   switchRole: () => {},
   logout: () => {},
   login: async () => false,
@@ -130,6 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         role: currentPreset.role,
         displayName: currentPreset.displayName,
+        userName: user ? `${user.firstName} ${user.lastName}`.trim() : currentPreset.name,
         switchRole,
         logout,
         login,
