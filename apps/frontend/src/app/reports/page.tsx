@@ -57,14 +57,10 @@ export default function ReportsAnalyticsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span className="badge badge-purple">Executive Business Intelligence</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Operational Scorecards & Turnaround Times</span>
-          </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             Organizational Performance & Management Reports
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Comprehensive analytics on publication turnaround times, employee on-time completion rates, and exportable audit documentation.
           </p>
         </div>
@@ -118,14 +114,13 @@ export default function ReportsAnalyticsPage() {
       <div className="glass-panel" style={{ padding: '1.75rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-navy)' }}>
               Employee Performance & Workload Scorecards
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               Measured against delivery milestones, on-time task completions, and manuscript authoring throughput
             </p>
           </div>
-          <span className="badge badge-emerald">Real-time Metrics</span>
         </div>
 
         <div className="data-table-container">

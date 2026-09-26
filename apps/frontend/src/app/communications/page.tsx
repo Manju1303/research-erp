@@ -16,7 +16,7 @@ export default function CommunicationsPage() {
     async function loadCommunications() {
       try {
         const res: any = await api.request('/communications');
-        setMessages(res?.data || []);
+        setMessages(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []));
       } catch (err) {
         console.error(err);
       }
@@ -48,14 +48,10 @@ export default function CommunicationsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span className="badge badge-blue">Centralized Correspondence</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Project-Linked Message Hub</span>
-          </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             Multi-Channel Communication Management
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Centralizes author inquiries, editorial remarks, peer reviewer feedback, and internal staff coordination notes.
           </p>
         </div>

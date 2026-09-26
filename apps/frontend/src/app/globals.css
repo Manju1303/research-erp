@@ -1,46 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  /* Scriptara Light Color Theme */
-  --bg-primary: #f8fafc;       /* Clean slate canvas */
-  --bg-secondary: #ffffff;     /* Crisp white surfaces */
-  --bg-card: #ffffff;          /* Card panels */
-  --bg-card-hover: #f1f5f9;    /* Card subtle hover */
-  --border-color: #e2e8f0;     /* Refined border */
-  --border-subtle: #f1f5f9;    /* Micro dividers */
-  --border-focus: #6366f1;     /* Focus outline */
+  /* Scriptara Oceanic Slate Palette (#F0F3FA, #D5DEEF, #B1C9EF, #8AAEE0, #628ECB, #395886) */
+  --bg-primary: #F0F3FA;        /* Canvas background #F0F3FA */
+  --bg-secondary: #ffffff;      /* Surface / panel background */
+  --bg-card: #ffffff;           /* Card background */
+  --bg-card-hover: #F8FAFD;     /* Hover surface */
+  --border-color: #D5DEEF;      /* Card and divider border #D5DEEF */
+  --border-subtle: #E8EEF8;     /* Inner divider */
+  --border-focus: #628ECB;      /* Focus outline #628ECB */
 
   /* Text Hierarchy */
-  --text-primary: #0f172a;     /* Deep slate charcoal for crisp readability */
-  --text-secondary: #475569;   /* Balanced body slate */
-  --text-muted: #64748b;       /* Caption / label slate */
-  --text-tertiary: #94a3b8;    /* Placeholder / subtle */
+  --text-primary: #1C2E4A;      /* High-contrast deep slate navy */
+  --text-secondary: #395886;    /* Deep oceanic slate navy from palette #395886 */
+  --text-muted: #647E9E;        /* Muted slate blue label */
+  --text-tertiary: #8AAEE0;     /* Placeholder and disabled state #8AAEE0 */
 
-  /* Scriptara Brand Accents */
-  --accent-primary: #4f46e5;
-  --accent-primary-hover: #4338ca;
-  --accent-primary-light: #eef2ff;
-  --accent-blue: #2563eb;
-  --accent-cyan: #0284c7;
-  --accent-indigo: #4f46e5;
+  /* Scriptara Brand Accents from Palette */
+  --accent-primary: #628ECB;       /* Primary interactive steel blue #628ECB */
+  --accent-primary-hover: #4F7BB8; /* Primary hover */
+  --accent-primary-light: #EBF1FA; /* Soft ice pill/tab background */
+  --accent-navy: #395886;          /* Deep brand navy #395886 */
+  --accent-sky: #8AAEE0;           /* Soft periwinkle sky blue #8AAEE0 */
+  --accent-ice: #B1C9EF;           /* Light blue accent #B1C9EF */
+  --accent-mist: #D5DEEF;          /* Mist border blue #D5DEEF */
+
+  /* Semantic Status Indicators */
   --accent-emerald: #059669;
-  --accent-amber: #d97706;
-  --accent-rose: #e11d48;
-  --accent-purple: #7c3aed;
+  --accent-amber: #D97706;
+  --accent-rose: #E11D48;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #0ea5e9 100%);
-  --gradient-brand: linear-gradient(135deg, #312e81 0%, #4338ca 60%, #6366f1 100%);
-  --gradient-card: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
-  --gradient-header: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  --gradient-subtle: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+  --gradient-primary: linear-gradient(135deg, #395886 0%, #628ECB 100%);
+  --gradient-brand: linear-gradient(135deg, #243656 0%, #395886 50%, #628ECB 100%);
+  --gradient-card: linear-gradient(180deg, #ffffff 0%, #F8FAFD 100%);
+  --gradient-header: linear-gradient(135deg, #ffffff 0%, #F0F3FA 100%);
+  --gradient-subtle: linear-gradient(135deg, rgba(98, 142, 203, 0.08) 0%, rgba(138, 174, 224, 0.08) 100%);
 
   /* Layered Shadows */
-  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
-  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+  --shadow-xs: 0 1px 2px 0 rgba(28, 46, 74, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(28, 46, 74, 0.06), 0 1px 2px -1px rgba(28, 46, 74, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(28, 46, 74, 0.07), 0 2px 4px -2px rgba(28, 46, 74, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(28, 46, 74, 0.08), 0 4px 6px -4px rgba(28, 46, 74, 0.04);
+  --shadow-glow: 0 0 20px rgba(98, 142, 203, 0.2);
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -65,9 +67,9 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   background-image: 
-    radial-gradient(ellipse at 15% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 10%, rgba(14, 165, 233, 0.04) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 100%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse at 15% 0%, rgba(98, 142, 203, 0.08) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 10%, rgba(138, 174, 224, 0.08) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 100%, rgba(213, 222, 239, 0.3) 0%, transparent 50%);
   background-attachment: fixed;
 }
 
@@ -90,7 +92,7 @@ button, input, select, textarea {
 }
 
 .glass-panel:hover {
-  border-color: #cbd5e1;
+  border-color: var(--accent-ice);
   box-shadow: var(--shadow-md);
 }
 
@@ -108,14 +110,14 @@ button, input, select, textarea {
   font-size: 0.875rem;
   border: none;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 2px 6px rgba(57, 88, 134, 0.25);
   transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
-  filter: brightness(1.05);
+  box-shadow: 0 4px 14px rgba(57, 88, 134, 0.35);
+  filter: brightness(1.06);
 }
 
 .btn-secondary {
@@ -124,7 +126,7 @@ button, input, select, textarea {
   justify-content: center;
   gap: 0.5rem;
   background: #ffffff;
-  color: var(--text-primary);
+  color: var(--accent-navy);
   padding: 0.65rem 1.25rem;
   border-radius: var(--radius-md);
   font-weight: 600;
@@ -136,8 +138,8 @@ button, input, select, textarea {
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: #f8fafd;
+  border-color: var(--accent-ice);
   color: var(--accent-primary);
 }
 
@@ -165,7 +167,7 @@ button, input, select, textarea {
 .form-input {
   width: 100%;
   background: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   padding: 0.65rem 0.95rem;
@@ -177,7 +179,7 @@ button, input, select, textarea {
 
 .form-input:focus {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  box-shadow: 0 0 0 3px rgba(98, 142, 203, 0.18);
 }
 
 .form-input::placeholder {
@@ -198,15 +200,15 @@ button, input, select, textarea {
 }
 
 .badge-blue {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: #EBF1FA;
+  color: #395886;
+  border: 1px solid #B1C9EF;
 }
 
 .badge-cyan {
-  background: #f0f9ff;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  background: #F0F5FD;
+  color: #395886;
+  border: 1px solid #D5DEEF;
 }
 
 .badge-emerald {
@@ -228,9 +230,9 @@ button, input, select, textarea {
 }
 
 .badge-purple {
-  background: #faf5ff;
-  color: #7e22ce;
-  border: 1px solid #e9d5ff;
+  background: #F4F6FB;
+  color: #395886;
+  border: 1px solid #B1C9EF;
 }
 
 /* Custom Scrollbar */
@@ -242,11 +244,11 @@ button, input, select, textarea {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-color);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--accent-sky);
 }
 
 /* Table */
@@ -266,9 +268,9 @@ button, input, select, textarea {
 }
 
 .data-table th {
-  background: #f8fafc;
-  color: var(--text-muted);
-  font-weight: 600;
+  background: #F8FAFD;
+  color: var(--accent-navy);
+  font-weight: 700;
   text-transform: uppercase;
   font-size: 0.725rem;
   letter-spacing: 0.05em;
@@ -278,7 +280,7 @@ button, input, select, textarea {
 
 .data-table td {
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-subtle);
   color: var(--text-secondary);
 }
 
@@ -287,7 +289,7 @@ button, input, select, textarea {
 }
 
 .data-table tr:hover td {
-  background: #f8fafc;
+  background: #F0F4FA;
   color: var(--text-primary);
 }
 

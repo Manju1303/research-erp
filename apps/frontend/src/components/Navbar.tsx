@@ -34,8 +34,8 @@ export const Navbar: React.FC = () => {
             flexShrink: 0,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#cbd5e1';
-            e.currentTarget.style.background = '#f8fafc';
+            e.currentTarget.style.borderColor = 'var(--accent-ice)';
+            e.currentTarget.style.background = '#F8FAFD';
             e.currentTarget.style.color = 'var(--accent-primary)';
           }}
           onMouseLeave={(e) => {
@@ -63,7 +63,7 @@ export const Navbar: React.FC = () => {
               paddingLeft: '2.4rem',
               height: 38,
               fontSize: '0.825rem',
-              background: '#f8fafc',
+              background: 'var(--bg-primary)',
               border: '1px solid var(--border-color)',
             }}
           />
@@ -105,8 +105,8 @@ export const Navbar: React.FC = () => {
             flexShrink: 0,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#cbd5e1';
-            e.currentTarget.style.background = '#f8fafc';
+            e.currentTarget.style.borderColor = 'var(--accent-ice)';
+            e.currentTarget.style.background = '#F8FAFD';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.borderColor = 'var(--border-color)';
@@ -124,7 +124,7 @@ export const Navbar: React.FC = () => {
               height: 7,
               borderRadius: '50%',
               background: 'var(--accent-primary)',
-              boxShadow: '0 0 6px rgba(79, 70, 229, 0.4)',
+              boxShadow: '0 0 6px rgba(98, 142, 203, 0.4)',
             }}
           />
         </button>
@@ -144,13 +144,13 @@ export const Navbar: React.FC = () => {
               fontWeight: 700,
               fontSize: '0.85rem',
               color: '#ffffff',
-              boxShadow: '0 2px 6px rgba(79, 70, 229, 0.2)',
+              boxShadow: '0 2px 6px rgba(57, 88, 134, 0.25)',
             }}
           >
             {user?.firstName?.[0] || 'A'}
           </div>
           <div className="navbar-user-text">
-            <div style={{ fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--accent-navy)', whiteSpace: 'nowrap' }}>
               {user ? `${user.firstName} ${user.lastName}` : 'Alex Vance'}
             </div>
             <div style={{ fontSize: '0.675rem', color: 'var(--accent-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>

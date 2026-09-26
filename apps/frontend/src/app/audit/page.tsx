@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
-import { Lock } from 'lucide-react';
 
 export default function AuditTrailPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -13,7 +12,7 @@ export default function AuditTrailPage() {
     async function loadLogs() {
       try {
         const res: any = await api.request('/audit-logs');
-        setLogs(res?.data || []);
+        setLogs(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []));
       } catch (err) {
         console.error(err);
       } finally {
@@ -33,18 +32,11 @@ export default function AuditTrailPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-            <span className="badge badge-rose" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-              <Lock size={12} />
-              <span>Immutable Ledger</span>
-            </span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ISO 27001 / Enterprise Compliance</span>
-          </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             System Audit Trail & Security Logs
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
-            Cryptographically sealed and immutable audit trail capturing every mutating state change, permission grant, and QC gate decision.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+            Cryptographically sealed audit trail capturing every mutating state change, permission grant, and QC gate decision.
           </p>
         </div>
 

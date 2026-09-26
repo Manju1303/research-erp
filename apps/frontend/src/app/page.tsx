@@ -13,29 +13,24 @@ import {
   PenTool,
   Building2,
   ArrowRight,
-  Sparkles,
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { role, displayName } = useAuth();
   const [overview, setOverview] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      setLoading(true);
       try {
         const [dashData, projData]: [any, any] = await Promise.all([
           api.request('/dashboard/overview'),
           api.request('/projects'),
         ]);
         setOverview(dashData);
-        setProjects(projData?.data || []);
+        setProjects(Array.isArray(projData) ? projData : (Array.isArray(projData?.data) ? projData.data : []));
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
-      } finally {
-        setLoading(false);
       }
     }
     loadData();
@@ -50,7 +45,7 @@ export default function DashboardPage() {
           padding: '2.25rem',
           position: 'relative',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          background: 'linear-gradient(135deg, #ffffff 0%, #F8FAFD 100%)',
           border: '1px solid var(--border-color)',
           boxShadow: 'var(--shadow-sm)',
         }}
@@ -63,22 +58,13 @@ export default function DashboardPage() {
             width: 240,
             height: 240,
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(79, 70, 229, 0.08) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(98, 142, 203, 0.12) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-              <span className="badge badge-cyan" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <Sparkles size={12} />
-                Scriptara Workspace
-              </span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                {loading ? 'Syncing workspace telemetry...' : 'Enterprise Research Suite'}
-              </span>
-            </div>
-            <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
               Welcome back, {displayName}
             </h1>
             <p style={{ color: 'var(--text-secondary)', marginTop: '0.35rem', fontSize: '0.9rem', maxWidth: 660, lineHeight: 1.5 }}>

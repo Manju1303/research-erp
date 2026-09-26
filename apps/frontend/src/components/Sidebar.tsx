@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth, ROLE_PRESETS } from '../lib/auth-context';
+import { useAuth } from '../lib/auth-context';
 import { useSidebar } from '../lib/sidebar-context';
 import {
   LayoutDashboard,
@@ -27,7 +27,7 @@ import {
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { role, switchRole, logout } = useAuth();
+  const { role, user, displayName, logout } = useAuth();
   const { isMobileOpen, isCollapsed, closeMobile, toggleCollapse, isMobile } = useSidebar();
 
   const navItems = [
@@ -60,7 +60,7 @@ export const Sidebar: React.FC = () => {
         height: '100vh',
         backgroundColor: '#ffffff',
         zIndex: 100,
-        boxShadow: '4px 0 24px rgba(15, 23, 42, 0.15)',
+        boxShadow: '4px 0 24px rgba(28, 46, 74, 0.15)',
         display: 'flex',
         flexDirection: 'column',
         transform: isMobileOpen ? 'translateX(0)' : 'translateX(-100%)',
@@ -77,7 +77,7 @@ export const Sidebar: React.FC = () => {
         position: 'sticky',
         top: 0,
         zIndex: 40,
-        boxShadow: '1px 0 3px 0 rgba(15, 23, 42, 0.03)',
+        boxShadow: '1px 0 3px 0 rgba(28, 46, 74, 0.03)',
         transition: 'width 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         overflowX: 'hidden',
         flexShrink: 0,
@@ -88,12 +88,13 @@ export const Sidebar: React.FC = () => {
       {/* Brand Header */}
       <div
         style={{
-          padding: isCollapsed && !isMobile ? '1.25rem 0.75rem' : '1.25rem',
+          padding: isCollapsed && !isMobile ? '1rem 0.5rem' : '1.25rem',
           borderBottom: '1px solid var(--border-color)',
           display: 'flex',
+          flexDirection: isCollapsed && !isMobile ? 'column' : 'row',
           alignItems: 'center',
           justifyContent: isCollapsed && !isMobile ? 'center' : 'space-between',
-          gap: '0.75rem',
+          gap: '0.65rem',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
@@ -107,7 +108,7 @@ export const Sidebar: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)',
+              boxShadow: '0 2px 8px rgba(57, 88, 134, 0.25)',
               color: '#ffffff',
             }}
           >
@@ -120,7 +121,7 @@ export const Sidebar: React.FC = () => {
           </div>
           {(!isCollapsed || isMobile) && (
             <div style={{ overflow: 'hidden' }}>
-              <div style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.02em', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.02em', color: 'var(--accent-navy)', whiteSpace: 'nowrap' }}>
                 SCRIPTARA
               </div>
               <div style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: 700, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
@@ -136,7 +137,7 @@ export const Sidebar: React.FC = () => {
             onClick={closeMobile}
             aria-label="Close navigation drawer"
             style={{
-              background: '#f8fafc',
+              background: '#f8fafd',
               border: '1px solid var(--border-color)',
               width: 34,
               height: 34,
@@ -152,88 +153,37 @@ export const Sidebar: React.FC = () => {
             <X size={18} />
           </button>
         ) : (
-          !isCollapsed && (
-            <button
-              onClick={toggleCollapse}
-              aria-label="Collapse sidebar"
-              title="Collapse sidebar (hide label text)"
-              style={{
-                background: '#f8fafc',
-                border: '1px solid var(--border-color)',
-                width: 32,
-                height: 32,
-                borderRadius: 'var(--radius-md)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: 'var(--text-muted)',
-                transition: 'all 0.15s ease',
-                flexShrink: 0,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--accent-primary)';
-                e.currentTarget.style.borderColor = 'var(--accent-primary)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-muted)';
-                e.currentTarget.style.borderColor = 'var(--border-color)';
-              }}
-            >
-              <PanelLeftClose size={16} />
-            </button>
-          )
-        )}
-      </div>
-
-      {/* Role Switcher Console */}
-      {(!isCollapsed || isMobile) ? (
-        <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border-color)', background: '#fafbfc' }}>
-          <label style={{ display: 'block', fontSize: '0.675rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.35rem', letterSpacing: '0.05em' }}>
-            Active Persona (RBAC)
-          </label>
-          <select
-            value={role}
-            onChange={(e) => switchRole(e.target.value)}
-            className="form-input"
-            style={{
-              fontSize: '0.75rem',
-              padding: '0.45rem 0.65rem',
-              background: '#ffffff',
-              border: '1px solid var(--border-color)',
-              cursor: 'pointer',
-              fontWeight: 500,
-            }}
-          >
-            {ROLE_PRESETS.map((p) => (
-              <option key={p.role} value={p.role}>
-                {p.displayName}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <div style={{ padding: '0.5rem 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid var(--border-color)' }}>
           <button
             onClick={toggleCollapse}
-            title="Expand sidebar"
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             style={{
-              background: '#f8fafc',
+              background: '#f8fafd',
               border: '1px solid var(--border-color)',
-              width: 36,
-              height: 36,
+              width: 32,
+              height: 32,
               borderRadius: 'var(--radius-md)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: 'var(--accent-primary)',
+              color: 'var(--text-secondary)',
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--accent-primary)';
+              e.currentTarget.style.borderColor = 'var(--accent-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-secondary)';
+              e.currentTarget.style.borderColor = 'var(--border-color)';
             }}
           >
-            <PanelLeftOpen size={17} />
+            {isCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Navigation Links */}
       <nav style={{ flex: 1, padding: isCollapsed && !isMobile ? '0.75rem 0.4rem' : '0.85rem 0.65rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', overflowY: 'auto' }}>
@@ -256,8 +206,8 @@ export const Sidebar: React.FC = () => {
                 padding: isCollapsed && !isMobile ? '0.65rem 0' : '0.55rem 0.75rem',
                 borderRadius: 'var(--radius-md)',
                 fontSize: '0.825rem',
-                fontWeight: isActive ? 600 : 500,
-                color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? 'var(--accent-navy)' : 'var(--text-secondary)',
                 background: isActive ? 'var(--accent-primary-light)' : 'transparent',
                 borderLeft: isCollapsed && !isMobile ? 'none' : isActive ? '3px solid var(--accent-primary)' : '3px solid transparent',
                 transition: 'all 0.15s ease',
@@ -270,89 +220,133 @@ export const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      {/* Footer Info & Permanent Logout Button */}
-      <div
-        style={{
-          padding: isCollapsed && !isMobile ? '0.75rem 0.4rem' : '0.85rem 1.25rem',
-          borderTop: '1px solid var(--border-color)',
-          fontSize: '0.725rem',
-          color: 'var(--text-muted)',
-          background: '#fafbfc',
-        }}
-      >
-        {(!isCollapsed || isMobile) ? (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-emerald)', boxShadow: '0 0 6px rgba(5, 150, 105, 0.4)' }} />
-              <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>v1.0 Production Suite</span>
+      {/* Footer User Info & Logout Button */}
+      {(!isCollapsed || isMobile) ? (
+        <div
+          style={{
+            padding: '0.85rem 1rem',
+            borderTop: '1px solid var(--border-color)',
+            background: '#f8fafd',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.65rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                minWidth: 34,
+                borderRadius: '50%',
+                background: 'var(--gradient-primary)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                boxShadow: '0 2px 6px rgba(57, 88, 134, 0.2)',
+              }}
+            >
+              {user?.firstName?.[0] || 'A'}
             </div>
-            <div style={{ fontSize: '0.7rem' }}>All 9 Enterprise Roles Active</div>
-
-            {/* Logout Button in Sidebar */}
-            <button
-              onClick={() => {
-                if (isMobile) closeMobile();
-                logout();
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.45rem',
-                width: '100%',
-                marginTop: '0.75rem',
-                padding: '0.55rem 0.75rem',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid #fee2e2',
-                background: '#fff1f2',
-                color: '#be123c',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#ffe4e6';
-                e.currentTarget.style.borderColor = '#fca5a5';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#fff1f2';
-                e.currentTarget.style.borderColor = '#fee2e2';
-              }}
-              title="Sign Out of Session"
-            >
-              <LogOut size={14} />
-              <span>Log Out</span>
-            </button>
-          </>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-            <span
-              style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-emerald)', boxShadow: '0 0 6px rgba(5, 150, 105, 0.4)' }}
-              title="Online / Production Suite"
-            />
-            <button
-              onClick={logout}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 38,
-                height: 38,
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid #fee2e2',
-                background: '#fff1f2',
-                color: '#be123c',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-              title="Log Out"
-            >
-              <LogOut size={16} />
-            </button>
+            <div style={{ overflow: 'hidden', minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user ? `${user.firstName} ${user.lastName}` : 'Alex Vance'}
+              </div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--accent-primary)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {displayName}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+
+          <button
+            onClick={() => {
+              if (isMobile) closeMobile();
+              logout();
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              width: '100%',
+              padding: '0.5rem 0.75rem',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid #fee2e2',
+              background: '#fff1f2',
+              color: '#be123c',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#ffe4e6';
+              e.currentTarget.style.borderColor = '#fca5a5';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#fff1f2';
+              e.currentTarget.style.borderColor = '#fee2e2';
+            }}
+            title="Sign Out of Session"
+          >
+            <LogOut size={14} />
+            <span>Log Out</span>
+          </button>
+        </div>
+      ) : (
+        <div
+          style={{
+            padding: '0.75rem 0.4rem',
+            borderTop: '1px solid var(--border-color)',
+            background: '#f8fafd',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.6rem',
+          }}
+        >
+          <div
+            title={user ? `${user.firstName} ${user.lastName} (${displayName})` : displayName}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background: 'var(--gradient-primary)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: '0.775rem',
+              boxShadow: '0 2px 6px rgba(57, 88, 134, 0.2)',
+            }}
+          >
+            {user?.firstName?.[0] || 'A'}
+          </div>
+          <button
+            onClick={logout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 34,
+              height: 34,
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid #fee2e2',
+              background: '#fff1f2',
+              color: '#be123c',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            title="Log Out"
+          >
+            <LogOut size={15} />
+          </button>
+        </div>
+      )}
     </aside>
   );
 };

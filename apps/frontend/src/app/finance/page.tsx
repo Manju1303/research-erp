@@ -19,8 +19,8 @@ export default function FinanceBillingPage() {
           api.request('/finance/payments'),
           api.request('/finance/overview'),
         ]);
-        setInvoices(invRes?.data || []);
-        setPayments(payRes?.data || []);
+        setInvoices(Array.isArray(invRes) ? invRes : (Array.isArray(invRes?.data) ? invRes.data : []));
+        setPayments(Array.isArray(payRes) ? payRes : (Array.isArray(payRes?.data) ? payRes.data : []));
         setOverview(overRes || {});
       } catch (err) {
         console.error(err);
@@ -34,14 +34,10 @@ export default function FinanceBillingPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span className="badge badge-emerald">Accounting & Receivables</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Project Billing & Journal APC</span>
-          </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             Finance & Project Billing Management
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Manage client quotations, milestone disbursements, journal APC payments, and automated receipts.
           </p>
         </div>

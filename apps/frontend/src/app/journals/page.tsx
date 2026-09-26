@@ -19,7 +19,7 @@ export default function JournalsIntelligencePage() {
     async function loadJournals() {
       try {
         const res: any = await api.request('/journals');
-        setJournals(res?.data || []);
+        setJournals(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []));
       } catch (err) {
         console.error(err);
       }
@@ -52,7 +52,7 @@ export default function JournalsIntelligencePage() {
           budget: parseFloat(matchBudget) || 0,
         }),
       });
-      setMatchedResults(res || []);
+      setMatchedResults(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []));
     } catch (err) {
       console.error(err);
     } finally {
@@ -63,17 +63,13 @@ export default function JournalsIntelligencePage() {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
       {/* Header Banner */}
-      <div className="glass-panel" style={{ padding: '1.75rem', position: 'relative', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
+      <div className="glass-panel" style={{ padding: '1.75rem', position: 'relative', background: 'linear-gradient(135deg, #ffffff 0%, #F8FAFD 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-              <span className="badge badge-cyan">Journal Intelligence DB</span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Curated External Publications</span>
-            </div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
               Centralized Journal Intelligence & Recommendation
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
               Maintain verified publisher classifications, impact metrics, article processing charges (APC), and automated journal matching.
             </p>
           </div>

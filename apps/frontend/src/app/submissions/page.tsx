@@ -15,7 +15,7 @@ export default function SubmissionsPage() {
     async function loadSubmissions() {
       try {
         const res: any = await api.request('/submissions');
-        setSubmissions(res?.data || []);
+        setSubmissions(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []));
       } catch (err) {
         console.error(err);
       } finally {
@@ -32,11 +32,7 @@ export default function SubmissionsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span className="badge badge-purple">External Editorial Operations</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Editorial & Peer Review Tracking</span>
-          </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             Journal Submission & Peer Review Tracker
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>

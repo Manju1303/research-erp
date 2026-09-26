@@ -50,14 +50,10 @@ export default function QualityControlPage() {
       <div className="glass-panel" style={{ padding: '1.75rem', position: 'relative', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-              <span className="badge badge-amber">Quality Gate 10-Point System</span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pre-Submission Verification</span>
-            </div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
               Internal Quality Control (QC) Workbench
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
               Enforce rigorous technical, ethical, formatting, and similarity standards before external journal submission.
             </p>
           </div>

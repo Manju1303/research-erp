@@ -13,7 +13,7 @@ export default function ClientsPage() {
     async function fetchClients() {
       try {
         const res: any = await api.request('/clients');
-        setClients(res?.data || []);
+        setClients(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []));
       } catch (err) {
         console.error(err);
       } finally {
@@ -40,10 +40,10 @@ export default function ClientsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             Institutional Researchers & Authors Directory
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Manage client profiles, verified ORCID credentials, university affiliations, and publication portfolios.
           </p>
         </div>

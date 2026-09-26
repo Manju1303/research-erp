@@ -12,7 +12,7 @@ export default function PublicationsTrackerPage() {
     async function loadPublications() {
       try {
         const res: any = await api.request('/publications');
-        setPublications(res?.data || []);
+        setPublications(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []));
       } catch (err) {
         console.error(err);
       }
@@ -34,19 +34,15 @@ export default function PublicationsTrackerPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span className="badge badge-emerald">Final Deliverables</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Scholarly Publications & DOIs</span>
-          </div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             Published Manuscripts & DOI Repository
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Permanent public registry of accepted papers, registered DOIs, volume citations, published PDFs, and verification certificates.
           </p>
         </div>
 
-        <button className="btn-primary" style={{ background: 'var(--accent-emerald)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+        <button className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
           <Plus size={16} />
           <span>Register Published Article</span>
         </button>

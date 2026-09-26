@@ -28,7 +28,7 @@ export default function TasksKanbanPage() {
 
   const COLUMNS = [
     { key: 'TODO', label: 'To Do', color: 'var(--text-muted)' },
-    { key: 'IN_PROGRESS', label: 'In Progress', color: 'var(--accent-blue)' },
+    { key: 'IN_PROGRESS', label: 'In Progress', color: 'var(--accent-primary)' },
     { key: 'UNDER_REVIEW', label: 'Under Review', color: 'var(--accent-amber)' },
     { key: 'COMPLETED', label: 'Completed', color: 'var(--accent-emerald)' },
   ];
@@ -55,10 +55,10 @@ export default function TasksKanbanPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             Operational Task & Workflow Board
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Monitor and advance development tasks assigned to research staff, reviewers, and publication executives.
           </p>
         </div>

@@ -55,11 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           method: 'POST',
           body: JSON.stringify({ email, password: 'Password123!' }),
         });
-        const token = res?.accessToken || res?.tokens?.accessToken;
+        const token = res?.accessToken || res?.tokens?.accessToken || res?.data?.accessToken || res?.data?.tokens?.accessToken;
+        const authUser = res?.user || res?.data?.user;
         if (token) {
           api.setToken(token);
-          if (res.user) {
-            setUser(res.user);
+          if (authUser) {
+            setUser(authUser);
             return;
           }
         }
@@ -108,10 +109,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         body: JSON.stringify({ email, password: pass }),
       });
-      const token = res?.accessToken || res?.tokens?.accessToken;
+      const token = res?.accessToken || res?.tokens?.accessToken || res?.data?.accessToken || res?.data?.tokens?.accessToken;
+      const authUser = res?.user || res?.data?.user;
       if (token) {
         api.setToken(token);
-        setUser(res.user);
+        if (authUser) {
+          setUser(authUser);
+        }
         return true;
       }
       return false;

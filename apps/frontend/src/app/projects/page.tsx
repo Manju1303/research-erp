@@ -33,7 +33,7 @@ export default function ProjectsPage() {
     setLoading(true);
     try {
       const res: any = await api.request('/projects');
-      let list = res?.data || [];
+      let list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
       if (statusFilter) {
         list = list.filter((p: any) => p.status === statusFilter);
       }
@@ -109,7 +109,7 @@ export default function ProjectsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--accent-navy)', letterSpacing: '-0.02em' }}>
             Research Projects Repository
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}>

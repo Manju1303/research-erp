@@ -69,7 +69,7 @@ class ApiClient {
       }
 
       const json = await response.json();
-      return json.data !== undefined ? json.data : json;
+      return json;
     } catch (err: any) {
       // If it's a real server response error (e.g. 400, 401, 403, 409), always throw it
       const isNetworkOffline = !err.message || 
