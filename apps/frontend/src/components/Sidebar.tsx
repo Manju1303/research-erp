@@ -21,13 +21,12 @@ import {
   Lock,
   PanelLeftClose,
   PanelLeftOpen,
-  LogOut,
   X,
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { role, user, displayName, logout } = useAuth();
+  const { role } = useAuth();
   const { isMobileOpen, isCollapsed, closeMobile, toggleCollapse, isMobile } = useSidebar();
 
   const navItems = [
@@ -220,7 +219,7 @@ export const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      {/* Footer User Info & Logout Button */}
+      {/* Footer System Status / Version Indicator */}
       {(!isCollapsed || isMobile) ? (
         <div
           style={{
@@ -228,123 +227,48 @@ export const Sidebar: React.FC = () => {
             borderTop: '1px solid var(--border-color)',
             background: '#f8fafd',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '0.65rem',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '0.725rem',
+            color: 'var(--text-muted)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <span
               style={{
-                width: 34,
-                height: 34,
-                minWidth: 34,
+                width: 7,
+                height: 7,
                 borderRadius: '50%',
-                background: 'var(--gradient-primary)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                fontSize: '0.8rem',
-                boxShadow: '0 2px 6px rgba(57, 88, 134, 0.2)',
+                background: 'var(--accent-emerald)',
+                boxShadow: '0 0 6px rgba(16, 185, 129, 0.4)',
+                display: 'inline-block',
               }}
-            >
-              {user?.firstName?.[0] || 'A'}
-            </div>
-            <div style={{ overflow: 'hidden', minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user ? `${user.firstName} ${user.lastName}` : 'Alex Vance'}
-              </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--accent-primary)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {displayName}
-              </div>
-            </div>
+            />
+            <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Scriptara Cloud</span>
           </div>
-
-          <button
-            onClick={() => {
-              if (isMobile) closeMobile();
-              logout();
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.45rem',
-              width: '100%',
-              padding: '0.5rem 0.75rem',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid #fee2e2',
-              background: '#fff1f2',
-              color: '#be123c',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#ffe4e6';
-              e.currentTarget.style.borderColor = '#fca5a5';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#fff1f2';
-              e.currentTarget.style.borderColor = '#fee2e2';
-            }}
-            title="Sign Out of Session"
-          >
-            <LogOut size={14} />
-            <span>Log Out</span>
-          </button>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.675rem', fontWeight: 600, color: 'var(--accent-primary)' }}>v1.0.4</span>
         </div>
       ) : (
         <div
           style={{
-            padding: '0.75rem 0.4rem',
+            padding: '0.85rem 0',
             borderTop: '1px solid var(--border-color)',
             background: '#f8fafd',
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.6rem',
+            justifyContent: 'center',
           }}
+          title="Scriptara Cloud (Active v1.0.4)"
         >
-          <div
-            title={user ? `${user.firstName} ${user.lastName} (${displayName})` : displayName}
+          <span
             style={{
-              width: 32,
-              height: 32,
+              width: 7,
+              height: 7,
               borderRadius: '50%',
-              background: 'var(--gradient-primary)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 700,
-              fontSize: '0.775rem',
-              boxShadow: '0 2px 6px rgba(57, 88, 134, 0.2)',
+              background: 'var(--accent-emerald)',
+              boxShadow: '0 0 6px rgba(16, 185, 129, 0.4)',
+              display: 'inline-block',
             }}
-          >
-            {user?.firstName?.[0] || 'A'}
-          </div>
-          <button
-            onClick={logout}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 34,
-              height: 34,
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid #fee2e2',
-              background: '#fff1f2',
-              color: '#be123c',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-            title="Log Out"
-          >
-            <LogOut size={15} />
-          </button>
+          />
         </div>
       )}
     </aside>

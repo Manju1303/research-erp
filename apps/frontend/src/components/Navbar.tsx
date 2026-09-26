@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../lib/auth-context';
 import { useSidebar } from '../lib/sidebar-context';
-import { Search, Bell, Menu, PanelLeftClose, PanelLeftOpen, LogOut, X, CheckCheck, FileText, ShieldCheck, CreditCard } from 'lucide-react';
+import { Search, Bell, Menu, LogOut, X, CheckCheck, FileText, ShieldCheck, CreditCard } from 'lucide-react';
 
 interface NotificationItem {
   id: string;
@@ -19,7 +19,7 @@ interface NotificationItem {
 
 export const Navbar: React.FC = () => {
   const { user, displayName, logout } = useAuth();
-  const { isCollapsed, toggleCollapse, toggleMobile, isMobile } = useSidebar();
+  const { toggleMobile, isMobile } = useSidebar();
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,47 +90,43 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="navbar-header">
-      {/* Left Controls: Sidebar Hide/Toggle + Search */}
+      {/* Left Controls: Mobile Drawer Trigger + Search */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flex: 1, minWidth: 0 }}>
-        {/* Sidebar Hide / Toggle Button */}
-        <button
-          onClick={isMobile ? toggleMobile : toggleCollapse}
-          aria-label={isMobile ? 'Open navigation drawer' : isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={isMobile ? 'Open navigation drawer' : isCollapsed ? 'Expand sidebar' : 'Hide / Collapse sidebar'}
-          style={{
-            background: '#ffffff',
-            border: '1px solid var(--border-color)',
-            width: 38,
-            height: 38,
-            borderRadius: 'var(--radius-md)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: 'var(--text-secondary)',
-            boxShadow: 'var(--shadow-xs)',
-            transition: 'all 0.15s ease',
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'var(--accent-ice)';
-            e.currentTarget.style.background = '#F8FAFD';
-            e.currentTarget.style.color = 'var(--accent-primary)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'var(--border-color)';
-            e.currentTarget.style.background = '#ffffff';
-            e.currentTarget.style.color = 'var(--text-secondary)';
-          }}
-        >
-          {isMobile ? (
+        {/* Mobile Navigation Drawer Trigger (Mobile Only - Desktop toggle is in Sidebar header) */}
+        {isMobile && (
+          <button
+            onClick={toggleMobile}
+            aria-label="Open navigation drawer"
+            title="Open navigation drawer"
+            style={{
+              background: '#ffffff',
+              border: '1px solid var(--border-color)',
+              width: 38,
+              height: 38,
+              borderRadius: 'var(--radius-md)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'var(--text-secondary)',
+              boxShadow: 'var(--shadow-xs)',
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--accent-ice)';
+              e.currentTarget.style.background = '#F8FAFD';
+              e.currentTarget.style.color = 'var(--accent-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-color)';
+              e.currentTarget.style.background = '#ffffff';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
+          >
             <Menu size={18} />
-          ) : isCollapsed ? (
-            <PanelLeftOpen size={18} />
-          ) : (
-            <PanelLeftClose size={18} />
-          )}
-        </button>
+          </button>
+        )}
 
         {/* Global Search Bar (Responsive) */}
         <form onSubmit={handleSearchSubmit} className="navbar-search-container" style={{ position: 'relative' }}>

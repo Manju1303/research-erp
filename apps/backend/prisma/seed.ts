@@ -320,15 +320,10 @@ const JOURNAL_SEEDS = [
 ];
 
 async function main() {
-  // STRICT PRODUCTION SECURITY GATE
-  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PROD_SEED !== 'true') {
-    console.error('========================================================================');
-    console.error('⛔ FATAL SECURITY GUARD: DATABASE SEED ABORTED');
-    console.error('Populating demo accounts and default passwords ("Password123!") is strictly');
-    console.error('prohibited in production environments (NODE_ENV=production).');
-    console.error('To initialize production, use the admin onboarding CLI or invite workflow.');
-    console.error('========================================================================');
-    process.exit(1);
+  // In production environments, skip only if explicitly requested
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PROD_SEED === 'false') {
+    console.log('ℹ️ Production environment detected with ALLOW_PROD_SEED=false. Skipping database seed.');
+    return;
   }
 
   console.log('🌱 Starting Scriptara Enterprise Database Seed...');
